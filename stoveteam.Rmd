@@ -1,0 +1,131 @@
+---
+title: "Notes on Confidence Intervals"
+author: "CSC 400, Spring 2024"
+date: "`r Sys.Date()`"
+output: html_document
+runtime: shiny
+resource_files:
+- computation/app.R
+- mean/app.R
+- sampling/app.R
+- proportion/app.R
+---
+
+```{r setup, include=FALSE}
+## this doucment is published to:
+## https://homer.shinyapps.io/stoveteam/
+library(shiny)
+```
+
+## Introducton
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sed velit tincidunt, pharetra velit ac, faucibus libero. Praesent fermentum leo ac justo placerat, et interdum felis rhoncus. Phasellus mattis ullamcorper orci sit amet mattis. Vestibulum malesuada facilisis massa, et venenatis mi feugiat in. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut venenatis varius lacinia. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam consectetur auctor pretium. Etiam id pretium purus. Ut mattis interdum nunc non lobortis. Morbi quis vulputate est. 
+
+
+
+
+## Point Estimation and Sampling Variability
+
+Integer ullamcorper, libero quis volutpat tempor, lacus augue viverra enim, ac convallis magna massa sed nulla. Mauris vehicula vitae justo nec ultricies. Nunc feugiat enim vitae quam pretium, in mollis nisl vehicula. Proin varius nulla elit, non aliquam urna aliquam quis. Maecenas malesuada erat convallis lectus blandit, eget efficitur ex maximus. Integer facilisis nisl eget felis semper, ac tempor diam pulvinar. Praesent bibendum augue enim, in egestas lectus mollis ut. Pellentesque tincidunt purus mi, eget sollicitudin leo vestibulum id. Etiam laoreet quam vitae metus ultrices, in faucibus ex dapibus. Vestibulum eu dictum sem, ac viverra velit. In ornare suscipit felis vitae ultrices. Morbi rhoncus mi id rhoncus hendrerit. Maecenas sed viverra diam, vitae tincidunt massa. Nullam ultrices, ligula et efficitur ullamcorper, risus mauris tincidunt tellus, id mollis urna mi porttitor leo. Nunc varius nulla semper ornare tincidunt. 
+
+```{r sampling, echo=FALSE}
+shinyAppDir(
+  appDir = "sampling",
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+
+## Confidence Intervals for a Proportion
+
+Nulla interdum tellus vel urna blandit suscipit. Fusce facilisis ullamcorper orci, id aliquam ligula viverra vel. Mauris lorem lectus, luctus eget nisl non, lobortis cursus nisi. Cras facilisis non dui in ullamcorper. Nulla vel leo mollis, euismod lacus rhoncus, viverra elit. Etiam arcu tortor, placerat sit amet auctor semper, rutrum eget neque. Donec venenatis rutrum odio sed egestas. In libero neque, rhoncus at metus et, facilisis laoreet tellus. 
+
+```{r proportion, echo=FALSE}
+shinyAppDir(
+  appDir = "proportion",
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+
+## Confidence Intervals for the Mean
+
+ Fusce interdum consectetur placerat. In congue lobortis turpis eget sagittis. Vestibulum urna eros, commodo vel sapien rutrum, euismod pellentesque enim. Nam felis lacus, faucibus vel mattis id, placerat a mi. Cras lacinia risus vel magna varius vehicula. Sed sit amet hendrerit felis. Fusce ex sapien, viverra ut eros vitae, venenatis semper dolor. Nam volutpat tempus neque, nec suscipit sapien ornare sit amet.
+
+
+```{r mean, echo=FALSE}
+shinyAppDir(
+  appDir = "mean",
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+
+## Computation From the Data
+
+Etiam id odio sit amet tortor fringilla hendrerit. Cras auctor accumsan ipsum, non ultrices enim convallis nec. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum ut tempus diam. Aliquam ac suscipit nisi. Morbi eleifend arcu leo, et aliquet eros tempus a. In feugiat risus non ipsum vehicula, ac consectetur lorem sodales. Sed pellentesque eros massa, nec molestie velit iaculis a. Nullam laoreet euismod arcu, viverra feugiat est dictum vel. Cras egestas nisl eget velit molestie lobortis. Cras sodales scelerisque ligula id aliquam. Proin vitae justo interdum, tincidunt neque sit amet, dignissim dui. Duis mollis molestie eros, at varius est consectetur ut. 
+
+```{r computation, echo=FALSE}
+shinyAppDir(
+  appDir = "computation",
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+## RStudio Filler
+
+This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
+
+To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+
+### Inputs and Outputs
+
+You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+
+```{r eruptions, echo=FALSE}
+inputPanel(
+  selectInput("n_breaks", label = "Number of bins:",
+              choices = c(10, 20, 35, 50), selected = 20),
+  
+  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
+              min = 0.2, max = 2, value = 1, step = 0.2)
+)
+
+renderPlot({
+  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
+       xlab = "Duration (minutes)", main = "Geyser eruption duration")
+  
+  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
+  lines(dens, col = "blue")
+})
+```
+
+### Embedded Application
+
+It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+
+```{r tabsets, echo=FALSE}
+shinyAppDir(
+  system.file("examples/06_tabsets", package = "shiny"),
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+
