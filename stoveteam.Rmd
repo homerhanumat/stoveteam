@@ -28,6 +28,8 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sed velit tincidun
 
 Integer ullamcorper, libero quis volutpat tempor, lacus augue viverra enim, ac convallis magna massa sed nulla. Mauris vehicula vitae justo nec ultricies. Nunc feugiat enim vitae quam pretium, in mollis nisl vehicula. Proin varius nulla elit, non aliquam urna aliquam quis. Maecenas malesuada erat convallis lectus blandit, eget efficitur ex maximus. Integer facilisis nisl eget felis semper, ac tempor diam pulvinar. Praesent bibendum augue enim, in egestas lectus mollis ut. Pellentesque tincidunt purus mi, eget sollicitudin leo vestibulum id. Etiam laoreet quam vitae metus ultrices, in faucibus ex dapibus. Vestibulum eu dictum sem, ac viverra velit. In ornare suscipit felis vitae ultrices. Morbi rhoncus mi id rhoncus hendrerit. Maecenas sed viverra diam, vitae tincidunt massa. Nullam ultrices, ligula et efficitur ullamcorper, risus mauris tincidunt tellus, id mollis urna mi porttitor leo. Nunc varius nulla semper ornare tincidunt. 
 
+<!-- Eivory does this app-->
+
 ```{r sampling, echo=FALSE}
 shinyAppDir(
   appDir = "sampling",
@@ -42,6 +44,8 @@ shinyAppDir(
 
 Nulla interdum tellus vel urna blandit suscipit. Fusce facilisis ullamcorper orci, id aliquam ligula viverra vel. Mauris lorem lectus, luctus eget nisl non, lobortis cursus nisi. Cras facilisis non dui in ullamcorper. Nulla vel leo mollis, euismod lacus rhoncus, viverra elit. Etiam arcu tortor, placerat sit amet auctor semper, rutrum eget neque. Donec venenatis rutrum odio sed egestas. In libero neque, rhoncus at metus et, facilisis laoreet tellus. 
 
+<!-- Finn does this app-->
+
 ```{r proportion, echo=FALSE}
 shinyAppDir(
   appDir = "proportion",
@@ -55,6 +59,8 @@ shinyAppDir(
 ## Confidence Intervals for the Mean
 
  Fusce interdum consectetur placerat. In congue lobortis turpis eget sagittis. Vestibulum urna eros, commodo vel sapien rutrum, euismod pellentesque enim. Nam felis lacus, faucibus vel mattis id, placerat a mi. Cras lacinia risus vel magna varius vehicula. Sed sit amet hendrerit felis. Fusce ex sapien, viverra ut eros vitae, venenatis semper dolor. Nam volutpat tempus neque, nec suscipit sapien ornare sit amet.
+ 
+<!-- Rhys does this app-->
 
 
 ```{r mean, echo=FALSE}
@@ -70,6 +76,8 @@ shinyAppDir(
 ## Computation From the Data
 
 Etiam id odio sit amet tortor fringilla hendrerit. Cras auctor accumsan ipsum, non ultrices enim convallis nec. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum ut tempus diam. Aliquam ac suscipit nisi. Morbi eleifend arcu leo, et aliquet eros tempus a. In feugiat risus non ipsum vehicula, ac consectetur lorem sodales. Sed pellentesque eros massa, nec molestie velit iaculis a. Nullam laoreet euismod arcu, viverra feugiat est dictum vel. Cras egestas nisl eget velit molestie lobortis. Cras sodales scelerisque ligula id aliquam. Proin vitae justo interdum, tincidunt neque sit amet, dignissim dui. Duis mollis molestie eros, at varius est consectetur ut. 
+
+<!-- Christara does this app-->
 
 ```{r computation, echo=FALSE}
 shinyAppDir(
