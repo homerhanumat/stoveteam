@@ -2,7 +2,12 @@
 title: "Notes on Confidence Intervals"
 author: "CSC 400, Spring 2024"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
 runtime: shiny
 resource_files:
 - computation/app.R
@@ -14,7 +19,12 @@ resource_files:
 ```{r setup, include=FALSE}
 ## this doucment is published to:
 ## https://homer.shinyapps.io/stoveteam/
+library(tidyverse)
+library(readxl)
 library(shiny)
+knitr::opts_chunk$set(
+  echo = FALSE
+)
 ```
 
 ## Introducton
@@ -75,7 +85,114 @@ shinyAppDir(
 
 ## Computation From the Data
 
-Etiam id odio sit amet tortor fringilla hendrerit. Cras auctor accumsan ipsum, non ultrices enim convallis nec. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum ut tempus diam. Aliquam ac suscipit nisi. Morbi eleifend arcu leo, et aliquet eros tempus a. In feugiat risus non ipsum vehicula, ac consectetur lorem sodales. Sed pellentesque eros massa, nec molestie velit iaculis a. Nullam laoreet euismod arcu, viverra feugiat est dictum vel. Cras egestas nisl eget velit molestie lobortis. Cras sodales scelerisque ligula id aliquam. Proin vitae justo interdum, tincidunt neque sit amet, dignissim dui. Duis mollis molestie eros, at varius est consectetur ut. 
+### A Parametric Approach
+
+Consider a population of $N$ households, where $N$ is some large number.  For each $i$, $1 \leq i \leq N$, let $\mu_i$ denote the mean per-capita daily use of firewood in the $i$-th household, measured as dry weight, in kilograms. Define:
+
+$$\mu = \frac{\sum_{i=1}^{i=N}\mu_i}{N}.$$
+
+Thus $\mu$ is the population mean of the mean household daily per-capita firewood use.  Our aim is to estimate $\mu$ and to compute a 90%-confidence interval for it.
+
+Our data consists of several daily measurements for each household in a random sample from the population.  For a sample of $n$ households, let household $j$ in the sample (where $1 \leq j \leq n$) be measured $N_j$ times, and let the $i$-th measurement (where $1 \leq i \leq N_j$) on household $j$ be denoted by $X_{ji}$.  Thus the first household has measurements:
+
+$$X_{11}, X_{12}, \ldots, X_{1N_1},$$
+
+the second household has measurements:
+
+$$X_{21}, X_{22}, \ldots, X_{2N_2},$$
+
+and so on up to the $n$=th household which has measurements:
+
+$$X_{n1}, X_{n2}, \ldots, X_{nN_n}.$$
+An unbiased estimator for $\mu$ is:
+
+$$\overline{\overline{X}} = \frac{\sum_{j=1}^{j=n}\bar{X}_j}{n},$$
+where for each $j$,
+
+$$\bar{X}_j = \frac{\sum_{i=1}^{i=N_j}X_{ji}}{N_j}$$
+is the mean of the measurements for the $j$-th household in the sample.
+
+Our estimator is subject, of course, to sampling variability, which is typically measured by the variance of the estimator.  The statement from the Aprovecho Research Center suggests using a pooled approach to computing this variance.  However, the pooled approach is only relevant when one may assume that the variance in daily measurements is the same for all households, and we see no reason why such an assumption is justified in this study.
+
+Accordingly we propose that the variances be estimated separately.  Thus the variance for household $j$ is estimated in the standard way by the unbiased estimator:
+
+$$\bar{\sigma^2}_j = \frac{\sum_{i=1}^{i=N_j}(X_{ji}-\bar{X}_j)^2}{N_j - 1},$$
+
+which leads to the following unbiased estimator for the variance of $\overline{\overline{X}}$:
+
+$$Var\left(\overline{\overline{X}}\right)=\frac{\sum_{j=1}^{j=n}\bar{\sigma^2}_j}{n^2}$$
+
+The standardized random variable
+
+$$Z = \frac{\overline{\overline{X}} - \mu}{\sqrt{Var\left(\overline{\overline{X}}\right)}}$$
+has a distribution that approaches the standard normal distribution (mean 0, vaiance 1) as the sample size $n$ increases.  Therefore, for a "large-enough" sample of households, we may take the normal-based confidence interval
+
+$$\left(\overline{\overline{X}} - z^*\sqrt{Var\left(\overline{\overline{X}}\right)}, \overline{\overline{X}} + z^*\sqrt{Var\left(\overline{\overline{X}}\right)}\right)$$
+as an approximate 90%-confidence interval for $\mu$.  (Here, the multiplier z* denotes the 95th-percentile of the standard normal distribution.)
+
+```{r}
+summary_data <- read_excel(
+  "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
+  range = "J22:Q38"
+)
+
+names(summary_data) <-
+  c(
+    "per_cap_mean",
+    "weighted_per_cap_mean",
+    "sd",
+    "var",
+    "weighted_var",
+    "days_measured",
+    "df",
+    "cov"
+  )
+
+compute_ci_2 <- function(data, level) {
+  n <- nrow(data)
+  sample_mean <- sum(data$per_cap_mean) / n
+  sd_sample_mean <- sqrt(sum(data$var) / n)
+  multiplier <- qnorm((1 + level) / 2)
+  margin <- multiplier * sd_sample_mean
+  interval <-
+    c(
+      lower = sample_mean - margin, 
+      upper = sample_mean + margin
+    )
+  list(
+    point_estimate = sample_mean, 
+    sd = sd_sample_mean,
+    interval = interval
+  )
+}
+
+res <- 
+  compute_ci_2(data = summary_data, level = 0.90)
+```
+
+
+For our data, results are as follows:
+
+* The point-estimate for $\mu$ is `r round(res$point_estimate,3)`
+* The standard error is `r round(res$sd,3)`
+* The approximate 90%-confidence interval for $\mu$ extends from `r round(res$interval[1],3)` to `r round(res$interval[2],3)`.
+
+However, the actual coverage-properties of these confidence intervals can be significantly different from their advertised confidence levels when the sample size is small, and especially when the the sample size is small and the population distribution is skewed.
+
+Our sample size is only 16, so we should see plot the sample to see whether there issome indication of skewness in the population.  Below is a density plot of the sample:
+
+```{r}
+ggplot(summary_data, aes(x = per_cap_mean)) +
+  geom_density(fill = "skyblue") +
+  geom_rug()
+```
+
+The sample has a strong right-skew, indicating that the population could be strongly right-skewed as well.  We might need to adopt a more robust approach to inference, here.
+
+### The Bootstrap
+
+
+Nulla interdum tellus vel urna blandit suscipit. Fusce facilisis ullamcorper orci, id aliquam ligula viverra vel. Mauris lorem lectus, luctus eget nisl non, lobortis cursus nisi. Cras facilisis non dui in ullamcorper. Nulla vel leo mollis, euismod lacus rhoncus, viverra elit. Etiam arcu tortor, placerat sit amet auctor semper, rutrum eget neque. Donec venenatis rutrum odio sed egestas. In libero neque, rhoncus at metus et, facilisis laoreet tellus. 
 
 <!-- Christara does this app-->
 

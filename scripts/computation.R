@@ -51,6 +51,7 @@ compute_ci(data = summary_data, level = 0.90)
 ## this one follows a better probability model:
 compute_ci_2 <- function(data, level) {
   n <- nrow(data)
+  sample_mean <- sum(data$per_cap_mean) / n
   sd_sample_mean <- sqrt(sum(data$var) / n)
   multiplier <- qnorm((1 + level) / 2)
   margin <- multiplier * sd_sample_mean
