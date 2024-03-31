@@ -78,7 +78,54 @@ ggplot(summary_data, aes(x = per_cap_mean)) +
 #3 and n = 16 sample size is small
 #3 perhaps bootstrap instead?
 
+lst <- vector(mode = "list", length = nrow(summary_data))
+for (i in 1:length(lst)) {
+  vals <- read_excel(
+    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
+    range = "I15:L15",
+    sheet = paste0("HH", i, " Data"),
+    col_names = FALSE
+  ) %>% 
+    as.matrix() %>% 
+    t() %>% 
+    .[,1]
+  vals <- vals[!is.na(vals)]
+  lst[[i]] <- vals
+}
 
+resampled_means <- function(data) {
+  n <- length(data)
+  means <- numeric(n)
+  for (i in 1:n) {
+    grp <- data[[sample(1:n, size = 1)]]
+    means[i] <-
+      sample(grp, size = length(grp), replace = TRUE) %>% 
+      mean()
+  }
+  means
+}
 
+## try it:
+resampled_means(data = lst)
 
+bootstrap_resamples <- function(m, data) {
+  resamps <- numeric(m)
+  for (i in 1:m) {
+    resamps[i] <- mean(resampled_means(data = data))
+  }
+  resamps
+}
 
+resamps <- bootstrap_resamples(2000, data = lst)
+
+level <- 0.90
+interval <- quantile(
+  resamps, 
+  probs = c(level / 2, (1 + level) / 2)
+)
+
+interval
+
+m <- mean(resamps)
+sd <- sqrt(sum((m - resamps)^2 / length(resamps)))
+sd
