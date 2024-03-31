@@ -23,7 +23,9 @@ library(tidyverse)
 library(readxl)
 library(shiny)
 knitr::opts_chunk$set(
-  echo = FALSE
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
 )
 ```
 
@@ -125,7 +127,7 @@ $$Var\left(\overline{\overline{X}}\right)=\frac{\sum_{j=1}^{j=n}\bar{\sigma^2}_j
 The standardized random variable
 
 $$Z = \frac{\overline{\overline{X}} - \mu}{\sqrt{Var\left(\overline{\overline{X}}\right)}}$$
-has a distribution that approaches the standard normal distribution (mean 0, vaiance 1) as the sample size $n$ increases.  Therefore, for a "large-enough" sample of households, we may take the normal-based confidence interval
+has a distribution that approaches the standard normal distribution (mean 0, variance 1) as the sample size $n$ increases.  Therefore, for a "large-enough" sample of households, we may take the normal-based confidence interval
 
 $$\left(\overline{\overline{X}} - z^*\sqrt{Var\left(\overline{\overline{X}}\right)}, \overline{\overline{X}} + z^*\sqrt{Var\left(\overline{\overline{X}}\right)}\right)$$
 as an approximate 90%-confidence interval for $\mu$.  (Here, the multiplier z* denotes the 95th-percentile of the standard normal distribution.)
@@ -151,7 +153,7 @@ names(summary_data) <-
 compute_ci_2 <- function(data, level) {
   n <- nrow(data)
   sample_mean <- sum(data$per_cap_mean) / n
-  sd_sample_mean <- sqrt(sum(data$var) / n)
+  sd_sample_mean <- sqrt(sum(data$var) / n^2)
   multiplier <- qnorm((1 + level) / 2)
   margin <- multiplier * sd_sample_mean
   interval <-
@@ -177,7 +179,7 @@ For our data, results are as follows:
 * The standard error is `r round(res$sd,3)`
 * The approximate 90%-confidence interval for $\mu$ extends from `r round(res$interval[1],3)` to `r round(res$interval[2],3)`.
 
-However, the actual coverage-properties of these confidence intervals can be significantly different from their advertised confidence levels when the sample size is small, and especially when the the sample size is small and the population distribution is skewed.
+However, the actual coverage-properties of these confidence intervals can be significantly different from their advertised confidence levels when the sample size is small, and especially when the population distribution is also skewed.
 
 Our sample size is only 16, so we should see plot the sample to see whether there issome indication of skewness in the population.  Below is a density plot of the sample:
 
@@ -192,7 +194,64 @@ The sample has a strong right-skew, indicating that the population could be stro
 ### The Bootstrap
 
 
-Nulla interdum tellus vel urna blandit suscipit. Fusce facilisis ullamcorper orci, id aliquam ligula viverra vel. Mauris lorem lectus, luctus eget nisl non, lobortis cursus nisi. Cras facilisis non dui in ullamcorper. Nulla vel leo mollis, euismod lacus rhoncus, viverra elit. Etiam arcu tortor, placerat sit amet auctor semper, rutrum eget neque. Donec venenatis rutrum odio sed egestas. In libero neque, rhoncus at metus et, facilisis laoreet tellus. 
+```{r}
+lst <- vector(mode = "list", length = nrow(summary_data))
+for (i in 1:length(lst)) {
+  vals <- read_excel(
+    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
+    range = "I15:L15",
+    sheet = paste0("HH", i, " Data"),
+    col_names = FALSE
+  ) %>% 
+    as.matrix() %>% 
+    t() %>% 
+    .[,1]
+  vals <- vals[!is.na(vals)]
+  lst[[i]] <- vals
+}
+
+set.seed(2424)
+resampled_means <- function(data) {
+  n <- length(data)
+  means <- numeric(n)
+  for (i in 1:n) {
+    grp <- data[[sample(1:n, size = 1)]]
+    means[i] <-
+      sample(grp, size = length(grp), replace = TRUE) %>% 
+      mean()
+  }
+  means
+}
+
+## try it:
+
+bootstrap_resamples <- function(m, data) {
+  resamps <- numeric(m)
+  for (i in 1:m) {
+    resamps[i] <- mean(resampled_means(data = data))
+  }
+  resamps
+}
+
+number_resamples <- 2000
+resamps <- bootstrap_resamples(number_resamples, data = lst)
+
+level <- 0.90
+interval <- quantile(
+  resamps, 
+  probs = c((1 - level) / 2, (1 + level) / 2)
+)
+
+m <- mean(resamps)
+sd <- sqrt(sum((m - resamps)^2)/ length(resamps))
+```
+
+Using the bootstrap method with `r number_resamples` resamples, we find that:
+
+* The standard error is `r round(sd,3)`
+* The approximate 90%-confidence interval for $\mu$ extends from `r round(interval[1],3)` to `r round(interval[2],3)`.
+
+
 
 <!-- Christara does this app-->
 

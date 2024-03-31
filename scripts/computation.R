@@ -20,39 +20,45 @@ names(summary_data) <-
     "cov"
   )
 
-## function to compute confidence interval from summary data:
-compute_ci <- function(data, level) {
+
+
+## function to compute confidence interval from summary data
+## (pooled computation of variance, probably not the
+## right thing to do):
+compute_ci_1 <- function(data, level) {
   pooled_var <- with(
     data,
     sum(var * df) / sum(df)
   )
   
-  sample_mean <- with(
-    data,
-    sum(per_cap_mean * days_measured) / sum(days_measured)
-  )
+  sample_mean <- mean(data$per_cap_mean)
   
-  n <- sum(data$days_measured)
-  df <- n - nrow(data)
-  multiplier <- qt((1 + level) / 2, df = df)
-  margin <- multiplier * sqrt(pooled_var / n)
+  n <- nrow(data)
+  deg_freedom <- sum(data$days_measured) - n
+  multiplier <- qt((1 + level) / 2, df = deg_freedom)
+  sd_sample_mean <- sqrt(pooled_var / n)
+  margin <- multiplier * sd_sample_mean
   interval <-
     c(
       lower = sample_mean - margin, 
       upper = sample_mean + margin
   )
-  list(point_estimate = sample_mean, interval = interval)
+  list(
+    point_estimate = sample_mean, 
+    se = sd_sample_mean,
+    interval = interval
+  )
 }
 
 
 ## try it out:
-compute_ci(data = summary_data, level = 0.90)
+compute_ci_1(data = summary_data, level = 0.90)
 
 ## this one follows a better probability model:
 compute_ci_2 <- function(data, level) {
   n <- nrow(data)
   sample_mean <- sum(data$per_cap_mean) / n
-  sd_sample_mean <- sqrt(sum(data$var) / n)
+  sd_sample_mean <- sqrt(sum(data$var) / n^2)
   multiplier <- qnorm((1 + level) / 2)
   margin <- multiplier * sd_sample_mean
   interval <-
@@ -122,11 +128,14 @@ resamps <- bootstrap_resamples(2000, data = lst)
 level <- 0.90
 interval <- quantile(
   resamps, 
-  probs = c(level / 2, (1 + level) / 2)
+  probs = c((1-level) / 2, (1 + level) / 2)
 )
 
 interval
 
 m <- mean(resamps)
-sd <- sqrt(sum((m - resamps)^2 / length(resamps)))
-sd
+se <- sqrt(sum((m - resamps)^2) / length(resamps))
+se
+
+ggplot(data.frame(resamps), aes(x = resamps)) +
+  geom_density()
