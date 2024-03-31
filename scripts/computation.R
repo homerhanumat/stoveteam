@@ -48,6 +48,35 @@ compute_ci <- function(data, level) {
 ## try it out:
 compute_ci(data = summary_data, level = 0.90)
 
+## this one follows a better probability model:
+compute_ci_2 <- function(data, level) {
+  n <- nrow(data)
+  sd_sample_mean <- sqrt(sum(data$var) / n)
+  multiplier <- qnorm((1 + level) / 2)
+  margin <- multiplier * sd_sample_mean
+  interval <-
+    c(
+      lower = sample_mean - margin, 
+      upper = sample_mean + margin
+    )
+  list(
+    point_estimate = sample_mean, 
+    sd = sd_sample_mean,
+    interval = interval
+  )
+}
+
+## try it out:
+compute_ci_2(data = summary_data, level = 0.90)
+
+## might want to plot those means:
+ggplot(summary_data, aes(x = per_cap_mean)) +
+  geom_density(fill = "skyblue") +
+  geom_rug()
+
+## hmm, pretty strong evidence of skewness here
+#3 and n = 16 sample size is small
+#3 perhaps bootstrap instead?
 
 
 
