@@ -23,58 +23,61 @@ names(summary_data) <-
 
 
 ## function to compute confidence interval from summary data
-## (pooled computation of variance, probably not the
-## right thing to do):
-compute_ci_1 <- function(data, level) {
-  pooled_var <- with(
-    data,
-    sum(var * df) / sum(df)
-  )
-  
-  sample_mean <- mean(data$per_cap_mean)
-  
-  n <- nrow(data)
-  deg_freedom <- sum(data$days_measured) - n
-  multiplier <- qt((1 + level) / 2, df = deg_freedom)
-  sd_sample_mean <- sqrt(pooled_var / n)
-  margin <- multiplier * sd_sample_mean
-  interval <-
-    c(
-      lower = sample_mean - margin, 
-      upper = sample_mean + margin
-  )
-  list(
-    point_estimate = sample_mean, 
-    se = sd_sample_mean,
-    interval = interval
-  )
+## as per:
+## https://stats.stackexchange.com/questions/12002/how-to-calculate-
+## the-confidence-interval-of-the-mean-of-means
+
+find_replicate_counts <- function(fn, n) {
+  counts <- numeric(n)
+  for (i in 1:length(lst)) {
+    vals <- read_excel(
+      path = fn,
+      range = "I15:L15",
+      sheet = paste0("HH", i, " Data"),
+      col_names = FALSE
+    ) %>% 
+      as.matrix() %>% 
+      t() %>% 
+      .[,1]
+    vals <- vals[!is.na(vals)]
+    counts[i] <- length(vals)
+  }
+  counts
 }
 
+counts <- find_replicate_counts(
+  fn = "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx",
+  n = nrow(summary_data)
+)
 
-## try it out:
-compute_ci_1(data = summary_data, level = 0.90)
-
-## this one follows a better probability model:
-compute_ci_2 <- function(data, level) {
+compute_ci_1 <- function(data, level, replications) {
   n <- nrow(data)
   sample_mean <- sum(data$per_cap_mean) / n
-  sd_sample_mean <- sqrt(sum(data$var) / n^2)
+  ss_between <- sum((sample_mean - data$per_cap_mean)^2)
   multiplier <- qnorm((1 + level) / 2)
-  margin <- multiplier * sd_sample_mean
-  interval <-
-    c(
-      lower = sample_mean - margin, 
-      upper = sample_mean + margin
-    )
+  compute_margin <- function(j) {
+    multiplier * sqrt(ss_between / (n * (n - 1) * j))
+  }
   list(
     point_estimate = sample_mean, 
-    sd = sd_sample_mean,
-    interval = interval
+    margins = c(
+      compute_margin(max(replications)),
+      compute_margin(min(replications))
+    ),
+    interval = c(
+      sample_mean - compute_margin(min(replications)),
+      sample_mean + compute_margin(min(replications))
+    )
   )
 }
 
 ## try it out:
-compute_ci_2(data = summary_data, level = 0.90)
+res <- compute_ci_1(
+  data = summary_data, 
+  level = 0.90,
+  replications = counts
+)
+res
 
 ## might want to plot those means:
 ggplot(summary_data, aes(x = per_cap_mean)) +
@@ -86,7 +89,7 @@ ggplot(summary_data, aes(x = per_cap_mean)) +
 #3 perhaps bootstrap instead?
 
 lst <- vector(mode = "list", length = nrow(summary_data))
-for (i in 1:length(lst)) {
+for (i in 1:length(counts)) {
   vals <- read_excel(
     "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
     range = "I15:L15",

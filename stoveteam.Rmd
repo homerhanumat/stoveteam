@@ -89,48 +89,51 @@ shinyAppDir(
 
 ### A Parametric Approach
 
-Consider a population of $N$ households, where $N$ is some large number.  For each $i$, $1 \leq i \leq N$, let $\mu_i$ denote the mean per-capita daily use of firewood in the $i$-th household, measured as dry weight, in kilograms. Define:
+We imagine a large population of households.  Each household $h$ in the population has a mean per-capta daily usage of wood, which we will denote $\mu_h$.  Of course $\mu_h$ varies from one household to another.  Let $\mu$ denote the mean of all these mean per-capita daily usages.  $\mu$ is the number that we are trying to estimate and for which we desire to form a confidence interval, based upon the data we have collected.
 
-$$\mu = \frac{\sum_{i=1}^{i=N}\mu_i}{N}.$$
+We make the assumption that the population of $\mu_h$-values is normallly distributed, with mean $\mu$ and some unknown standard deviation $\sigma_b$.  (The subscript $b$ calls to mind that the mean daily per-capita usage varies *between* housefolds, i.e., from one household to another.)
 
-Thus $\mu$ is the population mean of the mean household daily per-capita firewood use.  Our aim is to estimate $\mu$ and to compute a 90%-confidence interval for it.
+We select $n$ households at random from our population, and visit each household.  Let $i$ be any number from 1 to $n$, and consider household $i$ (the %i%-th household selected for study).  When we arrive at household $i$, we are of course not provided its $\mu_i$ value.  Instead we attempt to estimate $\mu_i$ by measuring the per-capita usage for each of $J_i$ days (in the study conducted, $J_i$ is sometimes 3 and sometimes 4).  We get $J_i$ measurements:
 
-Our data consists of several daily measurements for each household in a random sample from the population.  For a sample of $n$ households, let household $j$ in the sample (where $1 \leq j \leq n$) be measured $N_j$ times, and let the $i$-th measurement (where $1 \leq i \leq N_j$) on household $j$ be denoted by $X_{ji}$.  Thus the first household has measurements:
+$$X_{i1}, X_{i2}, \ldots, X_{iJ_i}.$$
+We compute the mean of these measurements:
 
-$$X_{11}, X_{12}, \ldots, X_{1N_1},$$
+$$\bar{X}_i = \frac{\sum_{j=1}^{J_i}X_{ij}}{J_i}.$$
+to estimate $\mu_i$.
 
-the second household has measurements:
+Now there is variability in this estimator $\bar{X}_i$, because the actual per-capita usage in a single household varies from day to day.  We make an important simplifying assumption, namely:  that the one-day per-capita usage for the household is normally distributed, with mean $\mu_i$ and some unknown standard deviation $\sigma_w$. (The subscript $w$ in the notation calls to mind that the variability is "within" a fixed household from day to day.) Importantly, we are assuming that $\sigma_w$ is the *same* for all households in the population.
 
-$$X_{21}, X_{22}, \ldots, X_{2N_2},$$
+We would then estimate $\mu$ by computing the mean of the $n$ household means:
 
-and so on up to the $n$=th household which has measurements:
+$$\overline{\overline{X}} = \frac{\sum_{i=1}^n \bar{X}_i}{n}$$
 
-$$X_{n1}, X_{n2}, \ldots, X_{nN_n}.$$
-An unbiased estimator for $\mu$ is:
+Note that there are *two* sources of variability in the above estimator:
 
-$$\overline{\overline{X}} = \frac{\sum_{j=1}^{j=n}\bar{X}_j}{n},$$
-where for each $j$,
+* variability in mean daily per-capita usage from one household to another, expressed by the unknown $\sigma_b$;
+* variability in per-capita usage from day to day, *within* a fixed household, expressed by the unkown $\sigma_w$.
 
-$$\bar{X}_j = \frac{\sum_{i=1}^{i=N_j}X_{ji}}{N_j}$$
-is the mean of the measurements for the $j$-th household in the sample.
+In fact, probability theory tells us that if all households were studied for the same number $J$ of days, then the distribution of $\overline{\overline{X}}$ is normal, with mean $\mu$ and standard deviation:
 
-Our estimator is subject, of course, to sampling variability, which is typically measured by the variance of the estimator.  The statement from the Aprovecho Research Center suggests using a pooled approach to computing this variance.  However, the pooled approach is only relevant when one may assume that the variance in daily measurements is the same for all households, and we see no reason why such an assumption is justified in this study.
+$$\frac{\sqrt{\sigma^2_b +\sigma^2_w\left(1/J_1+\ldots+1/J_n\right)}}{\sqrt{n}}.$$
 
-Accordingly we propose that the variances be estimated separately.  Thus the variance for household $j$ is estimated in the standard way by the unbiased estimator:
+Now let us turn to the task of making confidence intervals for $\mu$.  To this end, define the *between-sum of squares*:
 
-$$\bar{\sigma^2}_j = \frac{\sum_{i=1}^{i=N_j}(X_{ji}-\bar{X}_j)^2}{N_j - 1},$$
+$$SS_b = \sum_{i=1}^n \left( \overline{\overline{X}} - \bar{X}_i \right)^2.$$
 
-which leads to the following unbiased estimator for the variance of $\overline{\overline{X}}$:
+A bit of standard statistical theory tells us that if all households were measured for the same number $J$ of days, then the random variable:
 
-$$Var\left(\overline{\overline{X}}\right)=\frac{\sum_{j=1}^{j=n}\bar{\sigma^2}_j}{n^2}$$
+$$T = \frac{\overline{\overline{X}} - \mu}{\sqrt{\frac{SS_b}{Jn(n-1)}}}$$
+would have a t-distribution, with degrees of freedom equal to $n-1$.
 
-The standardized random variable
+One then derives, in a way familiar to statisticians, confidence intervals of the form:
 
-$$Z = \frac{\overline{\overline{X}} - \mu}{\sqrt{Var\left(\overline{\overline{X}}\right)}}$$
-has a distribution that approaches the standard normal distribution (mean 0, variance 1) as the sample size $n$ increases.  Therefore, for a "large-enough" sample of households, we may take the normal-based confidence interval
+$$\left(\overline{\overline{X}} - t^*\sqrt{\frac{SS_b}{Jn(n-1)}}, \overline{\overline{X}} + t^*\sqrt{\frac{SS_b}{Jn(n-1)}}\right),$$
 
-$$\left(\overline{\overline{X}} - z^*\sqrt{Var\left(\overline{\overline{X}}\right)}, \overline{\overline{X}} + z^*\sqrt{Var\left(\overline{\overline{X}}\right)}\right)$$
-as an approximate 90%-confidence interval for $\mu$.  (Here, the multiplier z* denotes the 95th-percentile of the standard normal distribution.)
+where $t^*$ is the quantile of the t-distribution appropriate for the desired level of confidence.
+
+Clearly, though,  there is an obstacle to using the above interval, since in our study not all households were measured for the same number of days:  the number of days was sometimes 3 and sometimes 4.  Hence the random variable $T$ will not, for us, have an exact t-distribution.  We won't be able to derive confidence intervals with coverage-properties that are known exactly.
+
+We can take a conservative approach, however.  Suppose that we were to simply throw away the final measurement for any day that had four measurements.  Then the number $J$ above could be set to three, and from the remaining data we could compute exact confidence intervals.  When we keep the fourth measurements, we can expect our estimates of the mean per-capita usage for those sample households to be more accurate than if we had stayed with just three measurement, so the confidence interval computed using $J=3$ would be a little bit too conservative, wider than it really needs to be.
 
 ```{r}
 summary_data <- read_excel(
@@ -150,38 +153,73 @@ names(summary_data) <-
     "cov"
   )
 
-compute_ci_2 <- function(data, level) {
+find_replicate_counts <- function(fn, n) {
+  counts <- numeric(n)
+  for (i in 1:length(counts)) {
+    vals <- read_excel(
+      path = fn,
+      range = "I15:L15",
+      sheet = paste0("HH", i, " Data"),
+      col_names = FALSE
+    ) %>% 
+      as.matrix() %>% 
+      t() %>% 
+      .[,1]
+    vals <- vals[!is.na(vals)]
+    counts[i] <- length(vals)
+  }
+  counts
+}
+
+counts <- find_replicate_counts(
+  fn = "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx",
+  n = nrow(summary_data)
+)
+
+compute_ci_1 <- function(data, level, replications) {
   n <- nrow(data)
   sample_mean <- sum(data$per_cap_mean) / n
-  sd_sample_mean <- sqrt(sum(data$var) / n^2)
+  ss_between <- sum((sample_mean - data$per_cap_mean)^2)
   multiplier <- qnorm((1 + level) / 2)
-  margin <- multiplier * sd_sample_mean
-  interval <-
-    c(
-      lower = sample_mean - margin, 
-      upper = sample_mean + margin
-    )
+  compute_margin <- function(j) {
+    multiplier * sqrt(ss_between / (n * (n - 1) * j))
+  }
   list(
     point_estimate = sample_mean, 
-    sd = sd_sample_mean,
-    interval = interval
+    margins = c(
+      compute_margin(max(replications)),
+      compute_margin(min(replications))
+    ),
+    interval = c(
+      sample_mean - compute_margin(min(replications)),
+      sample_mean + compute_margin(min(replications))
+    )
   )
 }
 
-res <- 
-  compute_ci_2(data = summary_data, level = 0.90)
+## try it out:
+res <- compute_ci_1(
+  data = summary_data, 
+  level = 0.90,
+  replications = counts
+)
 ```
 
 
-For our data, results are as follows:
+Accordingly, we keep all of our data, but make a conservative 90%-confidence interval using $J = 3$.
 
-* The point-estimate for $\mu$ is `r round(res$point_estimate,3)`
-* The standard error is `r round(res$sd,3)`
-* The approximate 90%-confidence interval for $\mu$ extends from `r round(res$interval[1],3)` to `r round(res$interval[2],3)`.
+Working from the data, we find:
 
-However, the actual coverage-properties of these confidence intervals can be significantly different from their advertised confidence levels when the sample size is small, and especially when the population distribution is also skewed.
+* The point-estimate of $\mu$ is `r round(res$point_estimate, 3)`.
+* The 90%-confidence interval extends from `r round(res$interval[1], 3)` to `r round(res$interval[2], 3)`.
+* The margin of error for the above interval is `r round(res$margins[2], 3)`.  (By comparison, the margin for an interval based on four measurements for *all* households would have been `r round(res$margins[1], 3)`.)
 
-Our sample size is only 16, so we should see plot the sample to see whether there issome indication of skewness in the population.  Below is a density plot of the sample:
+
+### A Caution
+
+Recall that one of our assumptions was that the underlying population of mean per-capita household usages was normally distributed.  In practice, no population distribution is ever exaclty normal.  we can take some comfort from statistical theory, which says that even if the population is not normal, the actual coverage-proprties of our confidence intervals converge to the advertised coverage-properties as sample size increases to infinity. Nonetheless, when the sample size is small and the population distribution differs significantly from normal (especially if it is skewed in one direction or another) then there may be significant differences between actual and advertised performance.
+
+Our sample size is only 16 households--somewhat small--so we should plot the sample to see whether there any indication of skewness in the population.  Below is a density plot of the sample:
 
 ```{r}
 ggplot(summary_data, aes(x = per_cap_mean)) +
@@ -189,9 +227,13 @@ ggplot(summary_data, aes(x = per_cap_mean)) +
   geom_rug()
 ```
 
-The sample has a strong right-skew, indicating that the population could be strongly right-skewed as well.  We might need to adopt a more robust approach to inference, here.
+The sample has a strong right-skew, indicating that the population could be strongly right-skewed as well.
+
+In future studies it would be prudent to take a larger sample of households, perhaps 30 or so.
 
 ### The Bootstrap
+
+Note:  Probably won't include this, as non-parametric bootstrap intervals are notoriously wide at small sample sizes.
 
 
 ```{r}
@@ -263,53 +305,3 @@ shinyAppDir(
   )
 )
 ```
-
-## RStudio Filler
-
-This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
-
-To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
-
-### Inputs and Outputs
-
-You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
-
-```{r eruptions, echo=FALSE}
-inputPanel(
-  selectInput("n_breaks", label = "Number of bins:",
-              choices = c(10, 20, 35, 50), selected = 20),
-  
-  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
-              min = 0.2, max = 2, value = 1, step = 0.2)
-)
-
-renderPlot({
-  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
-       xlab = "Duration (minutes)", main = "Geyser eruption duration")
-  
-  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
-  lines(dens, col = "blue")
-})
-```
-
-### Embedded Application
-
-It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
-
-```{r tabsets, echo=FALSE}
-shinyAppDir(
-  system.file("examples/06_tabsets", package = "shiny"),
-  options = list(
-    width = "100%", height = 550
-  )
-)
-```
-
-Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
-
-You can also use the `shinyApp` function to define an application inline rather then in an external directory.
-
-In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
-
-
-
