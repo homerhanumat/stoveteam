@@ -122,18 +122,18 @@ $$SS_b = \sum_{i=1}^n \left( \overline{\overline{X}} - \bar{X}_i \right)^2.$$
 
 A bit of standard statistical theory tells us that if all households were measured for the same number $J$ of days, then the random variable:
 
-$$T = \frac{\overline{\overline{X}} - \mu}{\sqrt{\frac{SS_b}{Jn(n-1)}}}$$
-would have a t-distribution, with degrees of freedom equal to $n-1$.
+$$T = \frac{\overline{\overline{X}} - \mu}{\sqrt{\frac{SS_b}{n(n-1)}}}$$
+would have a t-distribution, with degrees of freedom equal to $n-1$.  (Interestingly, the degrees of freedom are independent of $J$.)
 
 One then derives, in a way familiar to statisticians, confidence intervals of the form:
 
-$$\left(\overline{\overline{X}} - t^*\sqrt{\frac{SS_b}{Jn(n-1)}}, \overline{\overline{X}} + t^*\sqrt{\frac{SS_b}{Jn(n-1)}}\right),$$
+$$\left(\overline{\overline{X}} - t^*\sqrt{\frac{SS_b}{n(n-1)}},\, \overline{\overline{X}} + t^*\sqrt{\frac{SS_b}{n(n-1)}}\right),$$
 
 where $t^*$ is the quantile of the t-distribution appropriate for the desired level of confidence.
 
 Clearly, though,  there is an obstacle to using the above interval, since in our study not all households were measured for the same number of days:  the number of days was sometimes 3 and sometimes 4.  Hence the random variable $T$ will not, for us, have an exact t-distribution.  We won't be able to derive confidence intervals with coverage-properties that are known exactly.
 
-We can take a conservative approach, however.  Suppose that we were to simply throw away the final measurement for any day that had four measurements.  Then the number $J$ above could be set to three, and from the remaining data we could compute exact confidence intervals.  When we keep the fourth measurements, we can expect our estimates of the mean per-capita usage for those sample households to be more accurate than if we had stayed with just three measurement, so the confidence interval computed using $J=3$ would be a little bit too conservative, wider than it really needs to be.
+We can take a conservative approach, however.  Suppose that we were to simply throw away the final measurement for any day that had four measurements.  Then the number $J$ above could be set to three, and from the remaining data we could compute exact confidence intervals.
 
 ```{r}
 summary_data <- read_excel(
@@ -153,9 +153,10 @@ names(summary_data) <-
     "cov"
   )
 
-find_replicate_counts <- function(fn, n) {
-  counts <- numeric(n)
-  for (i in 1:length(counts)) {
+
+find_replicates <- function(fn, n) {
+  replicates <- vector(mode = "list", length = n)
+  for (i in 1:length(replicates)) {
     vals <- read_excel(
       path = fn,
       range = "I15:L15",
@@ -165,34 +166,36 @@ find_replicate_counts <- function(fn, n) {
       as.matrix() %>% 
       t() %>% 
       .[,1]
-    vals <- vals[!is.na(vals)]
-    counts[i] <- length(vals)
+    replicates[[i]] <- vals[!is.na(vals)]
   }
-  counts
+  replicates
 }
 
-counts <- find_replicate_counts(
+measures <- find_replicates(
   fn = "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx",
   n = nrow(summary_data)
 )
 
-compute_ci_1 <- function(data, level, replications) {
+compute_ci_1 <- function(data, level, use = NULL, r) {
   n <- nrow(data)
   sample_mean <- sum(data$per_cap_mean) / n
-  ss_between <- sum((sample_mean - data$per_cap_mean)^2)
   multiplier <- qnorm((1 + level) / 2)
-  compute_margin <- function(j) {
-    multiplier * sqrt(ss_between / (n * (n - 1) * j))
+  if (is.null(use)) {
+    ss_between <- sum((sample_mean - data$per_cap_mean)^2)
+  } else {
+    avgs <- numeric(length(r))
+    for (i in 1:length(r)) {
+      avgs[i] <- mean(r[[i]][1:use])
+    }
+    ss_between <- sum((sample_mean - avgs)^2)
   }
+  margin <- multiplier * sqrt(ss_between / (n * (n - 1)))
   list(
     point_estimate = sample_mean, 
-    margins = c(
-      compute_margin(max(replications)),
-      compute_margin(min(replications))
-    ),
+    margin = margin,
     interval = c(
-      sample_mean - compute_margin(min(replications)),
-      sample_mean + compute_margin(min(replications))
+      sample_mean - margin,
+      sample_mean + margin
     )
   )
 }
@@ -201,23 +204,24 @@ compute_ci_1 <- function(data, level, replications) {
 res <- compute_ci_1(
   data = summary_data, 
   level = 0.90,
-  replications = counts
+  use = 3,
+  r = measures
 )
 ```
 
 
-Accordingly, we keep all of our data, but make a conservative 90%-confidence interval using $J = 3$.
+Accordingly, we throw out the fourth-day measurements and make a confidence interval based on the above formula, where each household has three measurements.
 
-Working from the data, we find:
+We find:
 
 * The point-estimate of $\mu$ is `r round(res$point_estimate, 3)`.
 * The 90%-confidence interval extends from `r round(res$interval[1], 3)` to `r round(res$interval[2], 3)`.
-* The margin of error for the above interval is `r round(res$margins[2], 3)`.  (By comparison, the margin for an interval based on four measurements for *all* households would have been `r round(res$margins[1], 3)`.)
+* The margin of error for the above interval is `r round(res$margin, 3)`.
 
 
 ### A Caution
 
-Recall that one of our assumptions was that the underlying population of mean per-capita household usages was normally distributed.  In practice, no population distribution is ever exaclty normal.  we can take some comfort from statistical theory, which says that even if the population is not normal, the actual coverage-proprties of our confidence intervals converge to the advertised coverage-properties as sample size increases to infinity. Nonetheless, when the sample size is small and the population distribution differs significantly from normal (especially if it is skewed in one direction or another) then there may be significant differences between actual and advertised performance.
+Recall that one of our assumptions was that the underlying population of mean per-capita household usages was normally distributed.  In practice, no population distribution is ever exactly normal.  We can take some comfort from statistical theory, which assures us that even if the population is not normal, the actual coverage-properties of our confidence intervals converge to the advertised coverage-properties as sample size increases to infinity. Nonetheless, when the sample size is small and the population distribution differs significantly from normal (especially if it is skewed in one direction or another) then there may be a significant difference between actual and advertised performance.
 
 Our sample size is only 16 households--somewhat small--so we should plot the sample to see whether there any indication of skewness in the population.  Below is a density plot of the sample:
 
@@ -233,7 +237,7 @@ In future studies it would be prudent to take a larger sample of households, per
 
 ### The Bootstrap
 
-Note:  Probably won't include this, as non-parametric bootstrap intervals are notoriously wide at small sample sizes.
+Note:  More on the bootstrap in subsequent drafts.  Note that we get an interval rather similar to the one obtained above.
 
 
 ```{r}
@@ -293,7 +297,10 @@ Using the bootstrap method with `r number_resamples` resamples, we find that:
 * The standard error is `r round(sd,3)`
 * The approximate 90%-confidence interval for $\mu$ extends from `r round(interval[1],3)` to `r round(interval[2],3)`.
 
+### Further Thoughts
 
+* Given all of the picky assumptions in the parametric model, it may be best to go with the bootstrap.
+* We might be able to use the data we have to research how to strike the best balance between the number of sampled households and the number of measurements at each household.  (For example, if a researcher could equally well two villages for two days each in not much more tme than it takes to visit one village for four days, could this provide more precise estimates?)
 
 <!-- Christara does this app-->
 

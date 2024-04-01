@@ -27,8 +27,8 @@ names(summary_data) <-
 ## https://stats.stackexchange.com/questions/12002/how-to-calculate-
 ## the-confidence-interval-of-the-mean-of-means
 
-find_replicate_counts <- function(fn, n) {
-  counts <- numeric(n)
+find_replicates <- function(fn, n) {
+  replicates <- vector(mode = "list", length = n)
   for (i in 1:length(lst)) {
     vals <- read_excel(
       path = fn,
@@ -39,34 +39,36 @@ find_replicate_counts <- function(fn, n) {
       as.matrix() %>% 
       t() %>% 
       .[,1]
-    vals <- vals[!is.na(vals)]
-    counts[i] <- length(vals)
+    replicates[[i]] <- vals[!is.na(vals)]
   }
-  counts
+  replicates
 }
 
-counts <- find_replicate_counts(
+measures <- find_replicates(
   fn = "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx",
   n = nrow(summary_data)
 )
 
-compute_ci_1 <- function(data, level, replications) {
+compute_ci_1 <- function(data, level, use = NULL, r) {
   n <- nrow(data)
   sample_mean <- sum(data$per_cap_mean) / n
-  ss_between <- sum((sample_mean - data$per_cap_mean)^2)
   multiplier <- qnorm((1 + level) / 2)
-  compute_margin <- function(j) {
-    multiplier * sqrt(ss_between / (n * (n - 1) * j))
+  if (is.null(use)) {
+    ss_between <- sum((sample_mean - data$per_cap_mean)^2)
+  } else {
+    avgs <- numeric(length(r))
+    for (i in 1:length(r)) {
+      avgs[i] <- mean(r[[i]][1:use])
+    }
+    ss_between <- sum((sample_mean - avgs)^2)
   }
+  margin <- multiplier * sqrt(ss_between / (n * (n - 1)))
   list(
     point_estimate = sample_mean, 
-    margins = c(
-      compute_margin(max(replications)),
-      compute_margin(min(replications))
-    ),
+    margin = margin,
     interval = c(
-      sample_mean - compute_margin(min(replications)),
-      sample_mean + compute_margin(min(replications))
+      sample_mean - margin,
+      sample_mean + margin
     )
   )
 }
@@ -75,7 +77,8 @@ compute_ci_1 <- function(data, level, replications) {
 res <- compute_ci_1(
   data = summary_data, 
   level = 0.90,
-  replications = counts
+  use = 3,
+  r = measures
 )
 res
 
@@ -83,6 +86,38 @@ res
 ggplot(summary_data, aes(x = per_cap_mean)) +
   geom_density(fill = "skyblue") +
   geom_rug()
+
+## Simulate to see size of ss_b as replications incfease
+sim_ssb <- function(sb, sw, mu, n, repeats, reps = 1000) {
+  sims <- numeric(reps)
+  for (i in 1:reps) {
+    household <- rnorm(n, mean = mu, sd = sb)
+    avgs <- numeric(n)
+    for (j in 1:n) {
+      avgs[j] <- mean(rnorm(repeats[j], mean = household[j], sd = sw))
+    }
+    xbb <- mean(avgs)
+    sims[i] <- sum((xbb - avgs)^2)
+    tausq <- sb^2 + sw^2 / repeats
+  }
+  df <- data.frame(x = sims / tausq)
+  p <- ggplot(df, aes(x = x)) +
+    geom_density(fill = "burlywood")
+  print(p)
+  invisible(list(sims = sims, mean = mean(df$x)))
+}
+
+res <- sim_ssb(
+  sb = 2,
+  sw = 5,
+  mu = 5,
+  n = 10,
+  repeats = c(rep(4, 9), rep(3, 7)),
+  reps = 10000
+)
+res$mean
+
+
 
 ## hmm, pretty strong evidence of skewness here
 #3 and n = 16 sample size is small
