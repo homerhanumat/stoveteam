@@ -31,14 +31,14 @@ knitr::opts_chunk$set(
 
 ## Introducton
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sed velit tincidunt, pharetra velit ac, faucibus libero. Praesent fermentum leo ac justo placerat, et interdum felis rhoncus. Phasellus mattis ullamcorper orci sit amet mattis. Vestibulum malesuada facilisis massa, et venenatis mi feugiat in. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut venenatis varius lacinia. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam consectetur auctor pretium. Etiam id pretium purus. Ut mattis interdum nunc non lobortis. Morbi quis vulputate est. 
+Coming soon!
 
 
 
 
 ## Point Estimation and Sampling Variability
 
-Integer ullamcorper, libero quis volutpat tempor, lacus augue viverra enim, ac convallis magna massa sed nulla. Mauris vehicula vitae justo nec ultricies. Nunc feugiat enim vitae quam pretium, in mollis nisl vehicula. Proin varius nulla elit, non aliquam urna aliquam quis. Maecenas malesuada erat convallis lectus blandit, eget efficitur ex maximus. Integer facilisis nisl eget felis semper, ac tempor diam pulvinar. Praesent bibendum augue enim, in egestas lectus mollis ut. Pellentesque tincidunt purus mi, eget sollicitudin leo vestibulum id. Etiam laoreet quam vitae metus ultrices, in faucibus ex dapibus. Vestibulum eu dictum sem, ac viverra velit. In ornare suscipit felis vitae ultrices. Morbi rhoncus mi id rhoncus hendrerit. Maecenas sed viverra diam, vitae tincidunt massa. Nullam ultrices, ligula et efficitur ullamcorper, risus mauris tincidunt tellus, id mollis urna mi porttitor leo. Nunc varius nulla semper ornare tincidunt. 
+Coming soon!
 
 <!-- Eivory does this app-->
 
@@ -54,7 +54,7 @@ shinyAppDir(
 
 ## Confidence Intervals for a Proportion
 
-Nulla interdum tellus vel urna blandit suscipit. Fusce facilisis ullamcorper orci, id aliquam ligula viverra vel. Mauris lorem lectus, luctus eget nisl non, lobortis cursus nisi. Cras facilisis non dui in ullamcorper. Nulla vel leo mollis, euismod lacus rhoncus, viverra elit. Etiam arcu tortor, placerat sit amet auctor semper, rutrum eget neque. Donec venenatis rutrum odio sed egestas. In libero neque, rhoncus at metus et, facilisis laoreet tellus. 
+Coming soon!
 
 <!-- Finn does this app-->
 
@@ -70,7 +70,7 @@ shinyAppDir(
 
 ## Confidence Intervals for the Mean
 
- Fusce interdum consectetur placerat. In congue lobortis turpis eget sagittis. Vestibulum urna eros, commodo vel sapien rutrum, euismod pellentesque enim. Nam felis lacus, faucibus vel mattis id, placerat a mi. Cras lacinia risus vel magna varius vehicula. Sed sit amet hendrerit felis. Fusce ex sapien, viverra ut eros vitae, venenatis semper dolor. Nam volutpat tempus neque, nec suscipit sapien ornare sit amet.
+Coming soon!
  
 <!-- Rhys does this app-->
 
@@ -93,7 +93,7 @@ We imagine a large population of households.  Each household $h$ in the populati
 
 We make the assumption that the population of $\mu_h$-values is normallly distributed, with mean $\mu$ and some unknown standard deviation $\sigma_b$.  (The subscript $b$ calls to mind that the mean daily per-capita usage varies *between* housefolds, i.e., from one household to another.)
 
-We select $n$ households at random from our population, and visit each household.  Let $i$ be any number from 1 to $n$, and consider household $i$ (the %i%-th household selected for study).  When we arrive at household $i$, we are of course not provided its $\mu_i$ value.  Instead we attempt to estimate $\mu_i$ by measuring the per-capita usage for each of $J_i$ days (in the study conducted, $J_i$ is sometimes 3 and sometimes 4).  We get $J_i$ measurements:
+We select $n$ households at random from our population, and visit each household.  Let $i$ be any number from 1 to $n$, and consider household $i$ (the $i$-th household selected for study).  When we arrive at household $i$, we are of course not provided its $\mu_i$ value.  Instead we must estimate $\mu_i$ by measuring the per-capita usage for each of $J_i$ days (in the study conducted, $J_i$ is sometimes 3 and sometimes 4).  We get $J_i$ measurements:
 
 $$X_{i1}, X_{i2}, \ldots, X_{iJ_i}.$$
 We compute the mean of these measurements:
@@ -112,9 +112,9 @@ Note that there are *two* sources of variability in the above estimator:
 * variability in mean daily per-capita usage from one household to another, expressed by the unknown $\sigma_b$;
 * variability in per-capita usage from day to day, *within* a fixed household, expressed by the unkown $\sigma_w$.
 
-In fact, probability theory tells us that if all households were studied for the same number $J$ of days, then the distribution of $\overline{\overline{X}}$ is normal, with mean $\mu$ and standard deviation:
+In fact, probability theory tells us that the distribution of $\overline{\overline{X}}$ is normal, with mean $\mu$ and standard deviation:
 
-$$\frac{\sqrt{\sigma^2_b +\sigma^2_w\left(1/J_1+\ldots+1/J_n\right)}}{\sqrt{n}}.$$
+$$\frac{\sqrt{\sigma^2_b +\frac{\sigma^2_w\left(1/J_1+\ldots+1/J_n\right)}{n}}}{\sqrt{n}}.$$
 
 Now let us turn to the task of making confidence intervals for $\mu$.  To this end, define the *between-sum of squares*:
 
@@ -127,9 +127,9 @@ would have a t-distribution, with degrees of freedom equal to $n-1$.  (Interesti
 
 One then derives, in a way familiar to statisticians, confidence intervals of the form:
 
-$$\left(\overline{\overline{X}} - t^*\sqrt{\frac{SS_b}{n(n-1)}},\, \overline{\overline{X}} + t^*\sqrt{\frac{SS_b}{n(n-1)}}\right),$$
+$$\left(\overline{\overline{X}} - t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}},\, \overline{\overline{X}} + t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}}\right),$$
 
-where $t^*$ is the quantile of the t-distribution appropriate for the desired level of confidence.
+where $t_{n-1}^*$ is the quantile of the t-distribution with $n-1$ degrees of freedom that is appropriate for the desired level of confidence.
 
 Clearly, though,  there is an obstacle to using the above interval, since in our study not all households were measured for the same number of days:  the number of days was sometimes 3 and sometimes 4.  Hence the random variable $T$ will not, for us, have an exact t-distribution.  We won't be able to derive confidence intervals with coverage-properties that are known exactly.
 

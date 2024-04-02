@@ -88,7 +88,8 @@ ggplot(summary_data, aes(x = per_cap_mean)) +
   geom_rug()
 
 ## Simulate to see size of ss_b as replications incfease
-sim_ssb <- function(sb, sw, mu, n, repeats, reps = 1000) {
+sim_ssb <- function(sb, sw, mu, repeats, reps = 1000) {
+  n <- length(repeats)
   sims <- numeric(reps)
   for (i in 1:reps) {
     household <- rnorm(n, mean = mu, sd = sb)
@@ -111,8 +112,7 @@ res <- sim_ssb(
   sb = 2,
   sw = 5,
   mu = 5,
-  n = 10,
-  repeats = c(rep(4, 9), rep(3, 7)),
+  repeats = c(rep(4, 9), rep(100, 7)),
   reps = 10000
 )
 res$mean
