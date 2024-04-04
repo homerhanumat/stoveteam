@@ -1,8 +1,10 @@
 library(tidyverse)
 library(readxl)
 
+## DATA IMPORT ----
+
 ## imnport summary data
-## (this script assumes ctive directory is root dir of project):
+## (this script assumes active directory is root dir of project):
 summary_data <- read_excel(
   "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
   range = "J22:Q38"
@@ -20,45 +22,92 @@ names(summary_data) <-
     "cov"
   )
 
+get_house <- function(i) {
+  vals <- read_excel(
+    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
+    range = "I15:L15",
+    sheet = paste0("HH", i, " Data"),
+    col_names = FALSE
+  ) %>% 
+    as.matrix() %>% 
+    t() %>% 
+    .[,1]
+  vals <- vals[!is.na(vals)]
+  data.frame(
+    house = rep(i, length(vals)),
+    wood = vals
+  )
+}
 
+all_meas <- map_dfr(factor(1:16), get_house)
+
+## import all measurements on each household:
+
+get_house <- function(i) {
+  vals <- read_excel(
+    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
+    range = "I15:L15",
+    sheet = paste0("HH", i, " Data"),
+    col_names = FALSE
+  ) %>% 
+    as.matrix() %>% 
+    t() %>% 
+    .[,1]
+  vals <- vals[!is.na(vals)]
+  data.frame(
+    house = rep(i, length(vals)),
+    wood = vals
+  ) %>% 
+    group_by(house) %>% 
+    mutate(mean_percap = mean(wood)) %>% 
+    mutate(deviation = wood - mean_percap)
+}
+
+all_meas <- map_dfr(factor(1:16), get_house)
+
+## Need Hierarchical Model ----
+
+
+## should we make household a random effect?
+## (someone could claim that it's reasonble to assume
+## the per capita mean is the same for all households)
+
+library(nlme)
+mod_null <- lm(wood ~ 1, data = all_meas)
+mod_re <- nlme::lme(wood ~ 1, random = ~ 1 | house, data = all_meas)
+res <- anova.lme(mod_re, mod_null)
+res
+res$`p-value`[2]
+
+## clearly, we need to think of household as a random effect!
+
+
+## Confidence Interval (Parametric) ----
 
 ## function to compute confidence interval from summary data
 ## as per:
 ## https://stats.stackexchange.com/questions/12002/how-to-calculate-
 ## the-confidence-interval-of-the-mean-of-means
+## (Nut fixing their error)
 
-find_replicates <- function(fn, n) {
-  replicates <- vector(mode = "list", length = n)
-  for (i in 1:length(lst)) {
-    vals <- read_excel(
-      path = fn,
-      range = "I15:L15",
-      sheet = paste0("HH", i, " Data"),
-      col_names = FALSE
-    ) %>% 
-      as.matrix() %>% 
-      t() %>% 
-      .[,1]
-    replicates[[i]] <- vals[!is.na(vals)]
-  }
-  replicates
+group_measures <- function() {
+  grps <- unique(all_meas$house)
+  map(
+    grps, 
+    .f = function(grp) all_meas %>% filter(house == grp) %>% pull(wood))
 }
 
-measures <- find_replicates(
-  fn = "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx",
-  n = nrow(summary_data)
-)
-
-compute_ci_1 <- function(data, level, use = NULL, r) {
+compute_ci_1 <- function(data, level, use = NULL) {
   n <- nrow(data)
   multiplier <- qnorm((1 + level) / 2)
   if (is.null(use)) {
     sample_mean <- sum(data$per_cap_mean) / n
     ss_between <- sum((sample_mean - data$per_cap_mean)^2)
   } else {
-    avgs <- numeric(length(r))
-    for (i in 1:length(r)) {
-      avgs[i] <- mean(r[[i]][1:use])
+    grps_list <- group_measures()
+    avgs <- numeric(length(grps_list))
+    for (i in 1:length(grps_list)) {
+      avgs[i] <- mean(grps_list[[i]][1:use])
     }
     sample_mean <- sum(avgs) / n
     ss_between <- sum((sample_mean - avgs)^2)
@@ -78,17 +127,17 @@ compute_ci_1 <- function(data, level, use = NULL, r) {
 res <- compute_ci_1(
   data = summary_data, 
   level = 0.90,
-  use = 3,
-  r = measures
+  use = 3
 )
 res
 
 res_all <- compute_ci_1(
   data = summary_data, 
-  level = 0.90,
-  r = measures
+  level = 0.90
 )
 res_all
+
+## Checking some assumptions ----
 
 ## might want to plot those means:
 ggplot(summary_data, aes(x = per_cap_mean)) +
@@ -97,24 +146,8 @@ ggplot(summary_data, aes(x = per_cap_mean)) +
 ## evidence for strong skewness, a problem
 
 
-## are the deviations about the houehold means normal?
-devs <- numeric()
-for (i in 1:nrow(summary_data)) {
-  vals <- read_excel(
-    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
-    range = "I15:L15",
-    sheet = paste0("HH", i, " Data"),
-    col_names = FALSE
-  ) %>% 
-    as.matrix() %>% 
-    t() %>% 
-    .[, 1]
-  vals <- vals[!is.na(vals)]
-  m <- mean(vals)
-  devs <- c(devs, vals - m)
-}
-
-ggplot(data.frame(deviations = devs), aes(x = deviations)) +
+## are the deviations about the household means normal?
+ggplot(all_meas, aes(x = deviation)) +
   geom_density(fill = "skyblue") +
   geom_rug()
 

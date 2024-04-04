@@ -17,7 +17,7 @@ resource_files:
 ---
 
 ```{r setup, include=FALSE}
-## this doucment is published to:
+## this document is published to:
 ## https://homer.shinyapps.io/stoveteam/
 library(tidyverse)
 library(readxl)
@@ -90,9 +90,9 @@ shinyAppDir(
 
 ### A Parametric Approach
 
-We imagine a large population of households.  Each household $h$ in the population has a mean per-capta daily usage of wood, which we will denote $\mu_h$.  Of course $\mu_h$ varies from one household to another.  Let $\mu$ denote the mean of all these mean per-capita daily usages.  $\mu$ is the number that we are trying to estimate and for which we desire to form a confidence interval, based upon the data we have collected.
+We imagine a large population of households.  Each household $h$ in the population has a mean per-capita daily usage of wood, which we will denote $\mu_h$.  Of course $\mu_h$ varies from one household to another.  Let $\mu$ denote the mean of all these mean per-capita daily usages.  $\mu$ is the number that we are trying to estimate and for which we desire to form a confidence interval, based upon the data we have collected.
 
-We make the assumption that the population of $\mu_h$-values is normallly distributed, with mean $\mu$ and some unknown standard deviation $\sigma_b$.  (The subscript $b$ calls to mind that the mean daily per-capita usage varies *between* housefolds, i.e., from one household to another.)
+We make the assumption that the population of $\mu_h$-values is normally distributed, with mean $\mu$ and some unknown standard deviation $\sigma_b$.  (The subscript $b$ calls to mind that the mean daily per-capita usage varies *between* households, i.e., from one household to another.)
 
 We select $n$ households at random from our population, and visit each household.  Let $i$ be any number from 1 to $n$, and consider household $i$ (the $i$-th household selected for study).  When we arrive at household $i$, we are of course not provided its $\mu_i$ value.  Instead we must estimate $\mu_i$ by measuring the per-capita usage for each of $J_i$ days (in the study conducted, $J_i$ is sometimes 3 and sometimes 4).  We get $J_i$ measurements:
 
@@ -111,7 +111,7 @@ $$\overline{\overline{X}} = \frac{\sum_{i=1}^n \bar{X}_i}{n}$$
 Note that there are *two* sources of variability in the above estimator:
 
 * variability in mean daily per-capita usage from one household to another, expressed by the unknown $\sigma_b$;
-* variability in per-capita usage from day to day, *within* a fixed household, expressed by the unkown $\sigma_w$.
+* variability in per-capita usage from day to day, *within* a fixed household, expressed by the unknown $\sigma_w$.
 
 In fact, probability theory tells us that the distribution of $\overline{\overline{X}}$ is normal, with mean $\mu$ and standard deviation:
 
@@ -224,7 +224,7 @@ When we throw out the fourth-day measurements and make a confidence interval bas
 * The 90%-confidence interval extends from `r round(res$interval[1], 3)` to `r round(res$interval[2], 3)`.
 * The margin of error for the above interval is `r round(res$margin, 3)`.
 
-When we keep all of the measurments, we find that:
+When we keep all of the measurements, we find that:
 
 * The point-estimate of $\mu$ is `r round(res_all$point_estimate, 3)`.
 * The 90%-confidence interval extends from `r round(res_all$interval[1], 3)` to `r round(res_all$interval[2], 3)`.
@@ -310,7 +310,7 @@ Using the bootstrap method with `r number_resamples` resamples, we find that:
 
 ### Simulation Studies
 
-We have run some simulation studies to get some idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric 90%-confidence intervals constrcuted using all of the data actually cover the mean about 89% of the time.  It may be acceptable to use this interval formula and to keep all of the data.
+We have run some simulation studies to get some idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric 90%-confidence intervals constructed using all of the data actually cover the mean about 89% of the time.  It may be acceptable to use this interval formula and to keep all of the data.
 
 ### The Mixed-Effect Approach
 
@@ -348,7 +348,7 @@ res_lme <- intervals(mod, level = 0.90)
 
 ### Further Thoughts
 
-We might be able to use the data we have to research how to strike the best balance between the number of sampled households and the number of measurements at each household.  (For example, if a researcher could equally well two villages for two days each in not much more tme than it takes to visit one village for four days, could this provide more precise estimates?)
+We might be able to use the data we have to research how to strike the best balance between the number of sampled households and the number of measurements at each household.  (For example, if a researcher could equally well two villages for two days each in not much more time than it takes to visit one village for four days, could this provide more precise estimates?)
 
 <!-- Christara does this app-->
 
