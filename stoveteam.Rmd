@@ -22,6 +22,7 @@ resource_files:
 library(tidyverse)
 library(readxl)
 library(shiny)
+library(nlme)
 knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
@@ -178,15 +179,16 @@ measures <- find_replicates(
 
 compute_ci_1 <- function(data, level, use = NULL, r) {
   n <- nrow(data)
-  sample_mean <- sum(data$per_cap_mean) / n
   multiplier <- qnorm((1 + level) / 2)
   if (is.null(use)) {
+    sample_mean <- sum(data$per_cap_mean) / n
     ss_between <- sum((sample_mean - data$per_cap_mean)^2)
   } else {
     avgs <- numeric(length(r))
     for (i in 1:length(r)) {
       avgs[i] <- mean(r[[i]][1:use])
     }
+    sample_mean <- sum(avgs) / n
     ss_between <- sum((sample_mean - avgs)^2)
   }
   margin <- multiplier * sqrt(ss_between / (n * (n - 1)))
@@ -207,17 +209,26 @@ res <- compute_ci_1(
   use = 3,
   r = measures
 )
+
+res_all <- compute_ci_1(
+  data = summary_data, 
+  level = 0.90,
+  r = measures
+)
 ```
 
 
-Accordingly, we throw out the fourth-day measurements and make a confidence interval based on the above formula, where each household has three measurements.
-
-We find:
+When we throw out the fourth-day measurements and make a confidence interval based on the above formula, where each household has three measurements, we find that:
 
 * The point-estimate of $\mu$ is `r round(res$point_estimate, 3)`.
 * The 90%-confidence interval extends from `r round(res$interval[1], 3)` to `r round(res$interval[2], 3)`.
 * The margin of error for the above interval is `r round(res$margin, 3)`.
 
+When we keep all of the measurments, we find that:
+
+* The point-estimate of $\mu$ is `r round(res_all$point_estimate, 3)`.
+* The 90%-confidence interval extends from `r round(res_all$interval[1], 3)` to `r round(res_all$interval[2], 3)`.
+* The margin of error for the above interval is `r round(res_all$margin, 3)`.
 
 ### A Caution
 
@@ -297,10 +308,47 @@ Using the bootstrap method with `r number_resamples` resamples, we find that:
 * The standard error is `r round(sd,3)`
 * The approximate 90%-confidence interval for $\mu$ extends from `r round(interval[1],3)` to `r round(interval[2],3)`.
 
+### Simulation Studies
+
+We have run some simulation studies to get some idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric 90%-confidence intervals constrcuted using all of the data actually cover the mean about 89% of the time.  It may be acceptable to use this interval formula and to keep all of the data.
+
+### The Mixed-Effect Approach
+
+Our problem may also be viewed as a very special case of a linear mixed-effects.  Viewing the problem in this way and using the R-package **nlme**, we get the following results:
+
+```{r}
+get_house <- function(i) {
+  vals <- read_excel(
+    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
+    range = "I15:L15",
+    sheet = paste0("HH", i, " Data"),
+    col_names = FALSE
+  ) %>% 
+    as.matrix() %>% 
+    t() %>% 
+    .[,1]
+  vals <- vals[!is.na(vals)]
+  data.frame(
+    house = rep(i, length(vals)),
+    wood = vals
+  )
+}
+
+df <- map_dfr(factor(1:16), get_house)
+
+mod <- nlme::lme(wood ~ 1, random = ~ 1 | house, data = df)
+res_lme <- intervals(mod, level = 0.90)
+```
+
+
+* The point estimate of $\mu$ is `r round(res_lme$fixed[1,"est."], 3)`
+* The 90%-confidence interval extends from `r round(res_lme$fixed[1,"lower"], 3)` to `r round(res_lme$fixed[1,"upper"], 3)`.
+
+(**Note:** Intervals obtained from mixed-effects models are a bit wider, as the models are trying to estimate more parameters besides $\mu$.)
+
 ### Further Thoughts
 
-* Given all of the picky assumptions in the parametric model, it may be best to go with the bootstrap.
-* We might be able to use the data we have to research how to strike the best balance between the number of sampled households and the number of measurements at each household.  (For example, if a researcher could equally well two villages for two days each in not much more tme than it takes to visit one village for four days, could this provide more precise estimates?)
+We might be able to use the data we have to research how to strike the best balance between the number of sampled households and the number of measurements at each household.  (For example, if a researcher could equally well two villages for two days each in not much more tme than it takes to visit one village for four days, could this provide more precise estimates?)
 
 <!-- Christara does this app-->
 
