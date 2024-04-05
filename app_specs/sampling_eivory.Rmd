@@ -1,0 +1,153 @@
+---
+title: "Specs for Eivory's App"
+author: "Homer White"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+knitr::opts_chunk$set(
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Aim of the App
+
+The purpose of the app is to convince the reader that the household differ in how much wood they use per person in a day, i.e., that some households won't use a lot of wood per person; others may use quite a bit per person.
+
+When the reader understands this, she knows that the 57 daily measurements in our study cannot be viewed as a random sample of measurements from a "population" of all days in all households in the country.  Instead the data will have to viewed as the result of a two part process:
+
+
+1. Sampling 16 households at random from the population of all households that use the stoves, and then
+1. sampling a certain number of days (at least three) for each households and measuring the per-capita wood usage for each day.
+
+## Setup
+
+Here is our data:
+
+```{r}
+get_house <- function(i) {
+  vals <- read_excel(
+    "../st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
+    range = "I15:L15",
+    sheet = paste0("HH", i, " Data"),
+    col_names = FALSE
+  ) %>% 
+    as.matrix() %>% 
+    t() %>% 
+    .[,1]
+  vals <- vals[!is.na(vals)]
+  data.frame(
+    house = rep(i, length(vals)),
+    wood = vals
+  )
+}
+
+all_meas <- 
+  map_dfr(factor(1:16), get_house) %>% 
+  group_by(house) %>% 
+  mutate(mean_percap = mean(wood)) %>% 
+  mutate(deviation = wood - mean_percap)
+
+DT::datatable(all_meas %>% select(house, wood))
+```
+
+If households don't differ in the amount of wood they use per-capita, then each number in the `wood` column could just as well have appeared in a row for other household.  This means that the data could just as well have come scrambled randomly, like this:
+
+```{r}
+resample_data <- function() {
+  rs <-data.frame(
+    house = all_meas$house,
+    wood = sample(
+      all_meas$wood,
+      size = length(all_meas$wood),
+      replace = FALSE
+    )
+  )
+}
+
+DT::datatable(resample_data())
+```
+
+Run the above code-chunk several times, and watch the values shuffle each time!
+
+Now from the resampled data, we can compute the mean for each household.  we can compare the resampled means with the household means of the original data.
+
+Here is a function to make a density plot of the means, with a rug:
+
+```{r}
+density_with_rug <- function(df) {
+  ggplot(df, aes(x = household_mean)) +
+    geom_density(fill = "skyblue") +
+    geom_rug() +
+    xlim(c(0,8)) +
+    ylim(c(0,1)) +
+    labs(x = "household means of daily per-capita usage")
+}
+```
+
+Here is a density plot for the actual 16 household means:
+
+```{r}
+sample_means <- 
+  all_meas %>% 
+  group_by(house) %>% 
+  summarise(household_mean = mean(wood))
+density_with_rug(df = sample_means)
+```
+
+The following is a density plot of the 16 household means for randomly scrambled data:
+
+```{r}
+rs_means <- 
+  resample_data() %>% 
+  group_by(house) %>% 
+  summarise(household_mean = mean(wood))
+density_with_rug(df = rs_means)
+```
+
+Re-run the above code a few times. You will see that for scrambled data, the household means are much less spread apart than they are in the original data.
+
+One can also compare things numerically.  Here is a function to compute the mean and standard deviation of a vector of values:
+
+```{r}
+summary_stats <- function(vals) {
+  c(
+    mean = mean(vals),
+    stdev = sd(vals)
+  )
+}
+```
+
+Here are the mean and standard deviation of the original 16 household means:
+
+```{r}
+summary_stats(vals = sample_means$household_mean)
+```
+
+Run the code-chuck below a few times.  You'll see that for scrambled data the household means usually have a much smaller standard deviation.
+
+```{r}
+rs_means <- 
+  resample_data() %>% 
+  group_by(house) %>% 
+  summarise(household_mean = mean(wood))
+summary_stats(vals = rs_means$household_mean)
+```
+
+
+
+## App Specs
+
+* Sidebar Panel
+    * action button with id = "resample"
+* Main Panel (two columns, equal width)
+    * left column:  a density plot, with rug, of the 16 household means in the actual data, and underneath the plot a statement of the mean and the standard deviation of these 16 means;
+    * right column:  a density plot, with rug, of the 16 household means in the resampled data, and underneath the plot a statement of the mean and the standard deviation of these 16 household means.
+
+When the user pushes the Resample button, the `wood` column in the data is randomly scrambled, and a new density plot and statement of mean and standard deviation appear in the right column of the main panel.
+
