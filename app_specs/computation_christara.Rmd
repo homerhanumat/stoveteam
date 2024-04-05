@@ -238,6 +238,8 @@ ggplot(df, aes(x = t)) +
 
 When the user pushes the Simulate button, the relevant inputs are consulted to perform the requested simulation and the tabs are populated.
 
+When the user is choosing the inputs the density plot of the population should update, and so should the statement of $\mu$, but the simulation should not occur until the Simulate button is pressed.
+
 Before the first press of the button, the tabs should not show anything.
 
 The number of days of study at each sampled household is determined by the `js` input.  The user is to enter a string of the form:
