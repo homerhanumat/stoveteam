@@ -1,0 +1,172 @@
+---
+title: "Specs for Finn's App"
+author: "Homer White"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(DescTools)
+knitr::opts_chunk$set(
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Aim of the App
+
+The primary purpose of the app is to show that "level of confidence" means, namely:  that in repeated sampling, the percentage of times the confidence interval covers the parameter being estimated is equal to the level of confidence the interval is set to have.  A secondary purpose is to show that there are a variety of methods to make confidence interval for a population proportion, with the differences between them usually being minor.
+
+## Setup
+
+We can use the `BinomCI()` function from package **DescTools** to make confidence intervals of various sorts.
+
+
+```{r}
+make_interval <- function(x, n, level, method, report) {
+  res <- BinomCI(
+    x = x,
+    n = n,
+    conf.level = level,
+    method = method
+  )
+  if (report) {
+    lower <- round(res[1, "lwr.ci"], 3)
+    upper <- round(res[1, "upr.ci"], 3)
+    margin <- (upper - lower) / 2
+
+    msg <- glue::glue(
+      'When there are {successes} successes in {n} trials,
+      then our point estimate for the population proportion is:
+      {successes} / {n}, which is about {round(res[1, "est"], 3)},
+      and the {100 * level}%-confidence interval for the
+      population proportion is:
+  
+      ({lower}, {upper}).
+  
+      The margin of error is {round(margin * 100, 3)}%.'
+    )
+    cat(msg)
+  }
+  invisible(
+    data.frame(
+      est = res[1, "est"],
+      lwr.ci = res[1, "lwr.ci"],
+      upr.ci = res[1, "upr.ci"]
+    )
+  )
+}
+```
+
+Let's set some conditions:
+
+```{r}
+prob <- 0.50 ## proportion to be estimated
+n <- 65.     ## sample size
+level <- 0.90 #3 level of confidence desired
+method <- "agresti-coull" ## type of interval to make
+```
+
+
+Run the code below a few times, to see how the interval varies from sample to sample:
+
+
+```{r}
+successes <- rbinom(1, size = n, prob = prob)
+make_interval(
+  x = successes,
+  n = n,
+  level = level,
+  method = method,
+  report = TRUE
+)
+```
+
+The following function samples $N$ times, making an interval each time, and stores the estimates and intervals, along with a statement of whether the interval covered the population proportion, into a data frame:
+
+
+```{r}
+interval_df <- function(N, n, level, prob, method) {
+  xs <- rbinom(N, size = n, prob = prob)
+  ints <- xs %>% 
+    map_dfr(
+      make_interval, 
+      n = n, 
+      level = level,
+      method = method,
+      report = FALSE
+    ) %>% 
+    mutate(number = 1:N) %>% 
+    mutate(covers = prob >= lwr.ci & prob <= upr.ci)
+}
+```
+
+Here is an example of use:
+
+
+```{r}
+df <- interval_df(
+  N = 50,
+  n = n,
+  level = level,
+  prob = prob,
+  method = method
+)
+
+DT::datatable(df, options = list(scrollX = TRUE))
+```
+
+This function plots all of the intervals in the data frame:
+
+
+```{r}
+interval_plot <- function(data, prob) {
+  plot <- ggplot(data) +
+    geom_vline(aes(xintercept = prob)) +
+    geom_segment(
+      aes(
+        x = lwr.ci,
+        xend = upr.ci,
+        y = number,
+        yend = number,
+        color = covers
+      )
+    ) +
+    geom_point(aes(x = est, y = number), size = 0.5) +
+    labs( x = NULL, y = NULL) +
+    theme(
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+  plot
+}
+```
+
+Let's try it out:
+
+```{r}
+interval_plot(data = df, prob = prob)
+```
+
+
+## App Specs
+
+* Sidebar Panel
+    * slider input, id = "proportion"
+    * numeric input, id = "sample size"
+    * slider input, id = "level"
+    * select input, id = "interval_type", with options being the different kind of intervals that can be made with `DescTools::BinomCI()`.
+    * action button with id = "make_intervals"
+    * action button with id = "start_over"
+* Main Panel (one column)
+    * first row: plot showing fifty confidence intervals for the proportion
+    * second row: statement of total intervals so far, number of interval that contain the proportion, and percentage of intervals that contains the proportion
+
+When the user pushes the Make Intervals button, the proportion, sample size, level and interval-type inputs are hidden.  Fifty new samples are drawn.  Confidence intervals are computed and the second row of the main panel is updated accordingly.  On the first row the graph of the new set of fifty intervals appears.
+
+When the user pushes the Start Over button, the four hidden widgets reappear, the record of the intervals is destroyed, the graph on the first row is hidden and the second-row statement indicates that there are no intervals yet.
+
