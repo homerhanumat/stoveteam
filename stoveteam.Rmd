@@ -179,7 +179,7 @@ measures <- find_replicates(
 
 compute_ci_1 <- function(data, level, use = NULL, r) {
   n <- nrow(data)
-  multiplier <- qnorm((1 + level) / 2)
+  multiplier <- qt((1 + level) / 2, df = n - 1)
   if (is.null(use)) {
     sample_mean <- sum(data$per_cap_mean) / n
     ss_between <- sum((sample_mean - data$per_cap_mean)^2)

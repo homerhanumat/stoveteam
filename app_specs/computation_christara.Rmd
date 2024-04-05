@@ -1,0 +1,285 @@
+---
+title: "Specs for Christara's App"
+author: "Homer White"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+knitr::opts_chunk$set(
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Aim of the App
+
+The purpose of this app is to investigate the coverage properties of confidence intervals for $\mu$, the population mean of the mean per-capita daily use of wood, for the population of all households tat use the stoves.
+
+We want to be able to let the user choose a population of household means that varies from normal, and we also want to the user to be able to set the number of days for which each sampled household is studied.  (This number can vary from one sample house to another.)
+
+## Setup
+
+The populations from which the user chooses are a mix between two normal distributions.
+
+Probability density function for a mixed-normal distribution:
+
+```{r}
+pop_fun <- function(x, p, mu1, sd1, mu2, sd2) {
+  d1 <- p * dnorm(x, mean = mu1, sd = sd1)
+  d2 <- (1 - p) * dnorm(x, mean = mu2, sd = sd2)
+  d1 + d2
+}
+```
+
+Choose the mix:
+
+```{r}
+p <- 0.90 ## proportion of households that are of type 1
+mu1 <- 5 ## mean of type 1
+sd1 <- 1 ## standard deviation of type 1
+mu2 <- 10. ## mean of type 2
+sd2 <- 1 ## standard deviation of type 2
+sw <- 1 ## variability between measurements, for all households
+```
+
+
+Here's how to make a density curve for the distribution of our  hypothetical population of households:
+
+```{r}
+xlims <- c(
+  lower = min(mu1 - 3 * sd1, mu2 - 3 * sd1),
+  upper = max(mu1 + 3 * sd1, mu2 + 3 * sd1)
+)
+ggplot(data.frame(x = xlims), aes(x = x)) +
+  stat_function(
+    fun = pop_fun, 
+    n = 101, 
+    args = list(
+      mu1 = mu1, 
+      sd1 = sd1,
+      mu2 = mu2,
+      sd2 = sd2,
+      p = p
+    )) + 
+  labs(
+    x = "household mean per-capita usage",
+    y = NULL
+  )
+```
+
+So that subsequent functions won't have too many arguments, let's bundle our population info into a list:
+
+
+```{r}
+household <- list(
+  p = p,
+  mu1 = mu1,
+  sd1 = sd1,
+  mu2 = mu2,
+  sd2 = sd2,
+  sw = sw
+)
+```
+
+The following functions simulates conducting the study once.  It returns the means per-capita daily usage for each household in the sample.  **Note**:  `js` gives the number of days of study at each household in the sample.
+
+
+```{r}
+make_sample <- function(js, house) {
+  n <- length(js)
+  mean_h <- numeric(n)
+  for (i in 1:n) {
+    p <- house$p
+    house_type <- sample(c(1, 2), size = 1, prob = c(p, 1 - p))
+    house_mean <- ifelse(
+      house_type == 1,
+      rnorm(1, mean = house$mu1, sd = house$sd1),
+      rnorm(1, mean = house$mu2, sd = house$sd2)
+    )
+    mean_h[i] <- mean(rnorm(js[i], mean = house_mean, sd = house$sw))
+  }
+  mean_h
+}
+```
+
+Let's try it out:
+
+```{r}
+samp <- make_sample(
+  js = c(rep(4, 9), rep(3, 7)),
+  house = household
+)
+samp
+```
+
+For each simulated sample, we need to be able to compute a confidence interval for $\mu$, and the value of the t-statistic.  The following functions gives us that, and more, in a list:
+
+```{r}
+compute_from_sample <- function(data, level, mu) {
+  n <- length(data)
+  sample_mean <- sum(data) / n
+  ss_between <- sum((sample_mean - data)^2)
+  multiplier <- qt((1 + level) / 2, df = n - 1)
+  margin <- multiplier * sqrt(ss_between / (n * (n - 1)))
+  list(
+    point_estimate = sample_mean, 
+    margin = margin,
+    interval = c(
+      sample_mean - margin,
+      sample_mean + margin
+    ),
+    t = (sample_mean - mu) / sqrt(ss_between / (n * (n - 1)))
+  )
+}
+```
+
+Let's try it out:
+
+
+```{r}
+compute_from_sample(
+  data = samp,
+  level = 0.90,
+  mu = p * mu1 + (1 - p) * mu2
+)
+```
+
+Now for the full simulation function:
+
+
+```{r}
+simulate <- function(reps, house, js, level) {
+  good <- logical(reps)
+  ts <- numeric(reps)
+  for (i in 1:reps) {
+    samp <- make_sample(
+      js = js,
+      house = house
+    )
+    mu <- house$p * house$mu1 + (1 - house$p) * house$mu2
+    results <- compute_from_sample(
+      data = samp,
+      level = level,
+      mu = mu
+    )
+    lwr <- results$interval[1]
+    upr <- results$interval[2]
+    good[i] <- mu >= lwr & mu <= upr
+    ts[i] <- results$t
+  }
+  list(
+      good = good,
+      t = ts,
+      n = length(js)
+    )
+}
+```
+
+Let's run a simulations with many repetitions (`reps`).  We'll make 90%-confidence intervals:
+
+```{r}
+reps <- 10000
+level <- 0.90
+#js <- c(rep(4, 9), rep(3, 7))
+js <- rep(2, 32)
+sim_results <- simulate(
+  reps = reps,
+  house = household,
+  js = js,
+  level = level
+)
+```
+
+To find the percentage of intervals that covered $\mu$:
+
+
+```{r}
+mean(sim_results$good) * 100
+```
+
+The hope is that the above figure is converges to %90 as the number of reps increases, but departures from model assumptions (skewness of the population, unequal number of measurements between households) will prevent this from happening.
+
+We can make a graph that compares a density curve of the simulated t-statistics with a density curve of the ideal t-distribution:
+
+```{r}
+deg_freedom <- sim_results$n - 1
+df <- data.frame(t = sim_results$t)
+ggplot(df, aes(x = t)) +
+  geom_density(fill = "skyblue", color = "black") +
+  stat_function(
+    fun = dt,
+    n = 101,
+    args = list(df = deg_freedom),
+    color = "red"
+  )
+```
+
+
+
+## App Specs
+
+* Sidebar Panel
+    * slider input, id = "p"
+    * numeric input, id = "mu1"
+    * numeric input, id = "sd1"
+    * numeric input, id = "mu2"
+    * numeric input, id = "sd2"
+    * numeric input id = "sw"
+    * text input, id = "js"
+    * slider input, id = "level". (desired confidence level)
+    * numeric input, id = "reps" (number of simulations desired)
+    * action button with id = "simulate"
+* Main Panel (tabset with two tabs)
+    * first tab: plot of the population; underneath that states the mean $\mu$ of the population
+    * second tab: plot of the t-statistics.  Underneath that account for the intervals made in the simulations:  number of intervals, number that covered $\mu$, percentage that covered $\mu$.
+
+When the user pushes the Simulate button, the relevant inputs are consulted to perform the requested simulation and the tabs are populated.
+
+Before the first press of the button, the tabs should not show anything.
+
+The number of days of study at each sampled household is determined by the `js` input.  The user is to enter a string of the form:
+
+>(number of days, number of houses), (number of days, number of houses), ...
+
+For example:
+
+>(4, 8), (3, 7), (5, 1)
+
+Would mean that we are to sample $8+7+1 = 16$ houses, where:
+
+* 8 houses are studied for 4 days each;
+* 7 houses are studied for 3 days each;
+* 1 house is studied for 5 days.
+
+A function like the following could be used to parse the string entered by the user:
+
+```{r}
+library(stringr)
+parse_js <- function(str) {
+  pairs <- str_extract_all(
+    str,
+    pattern = "\\(\\d,\\s*\\d\\)"
+  ) %>% 
+  unlist()
+  js <- numeric()
+  for (i in 1:length(pairs)) {
+    pair <- str_extract_all(pairs[i], pattern = "\\d") %>% 
+      unlist() %>% 
+      as.numeric()
+    js <- c(js, rep(pair[1], times = pair[2]))
+  }
+  js
+}
+```
+
+Let's try it out:
+
+```{r}
+parse_js(str = "(4, 9), (3, 7)")
+```
+
+One important task is to validate the entry, so that if the user departs from convention there will not be any awkward errors in the app and instead the user will be asked to try the entry again.
+
