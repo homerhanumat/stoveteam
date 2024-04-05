@@ -314,7 +314,7 @@ We have run some simulation studies to get some idea of the effect of the likely
 
 ### The Mixed-Effect Approach
 
-Our problem may also be viewed as a very special case of a linear mixed-effects.  Viewing the problem in this way and using the R-package **nlme**, we get the following results:
+Our problem may also be viewed as a very special case of a linear mixed-effects model.  Viewing the problem in this way and using the R-package **nlme**, we get the following results:
 
 ```{r}
 get_house <- function(i) {
@@ -344,11 +344,9 @@ res_lme <- intervals(mod, level = 0.90)
 * The point estimate of $\mu$ is `r round(res_lme$fixed[1,"est."], 3)`
 * The 90%-confidence interval extends from `r round(res_lme$fixed[1,"lower"], 3)` to `r round(res_lme$fixed[1,"upper"], 3)`.
 
-(**Note:** Intervals obtained from mixed-effects models are a bit wider, as the models are trying to estimate more parameters besides $\mu$.)
-
 ### Further Thoughts
 
-We might be able to use the data we have to research how to strike the best balance between the number of sampled households and the number of measurements at each household.  (For example, if a researcher could equally well two villages for two days each in not much more time than it takes to visit one village for four days, could this provide more precise estimates?)
+We might be able to use the data we have to research how to strike the best balance between the number of sampled households and the number of measurements at each household.  (For example, if a researcher could equally well vist two households for two days each in not much more time than it takes to visit one household for four days, could this provide more precise estimates?)
 
 <!-- Christara does this app-->
 
