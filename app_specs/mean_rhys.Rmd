@@ -326,3 +326,5 @@ When the user pushes the Start Over button, the four hidden widgets reappear, th
 
 **Note**: you should think about how to modify the `interval_plot()` function so that the intervals and point-estimates are still easy to see with 100 intervals.
 
+Once you have the app working, you might want to think about how to improve it.  For example, could the user be allowed to say how many samples she wants at once, with a minimum of 50, and the interval plot shows just the final 50 intervals in the sample.  If so, what should be the maximum allowed number of samples at once?  Is there are way to speed up the makiing of samples and the computation of intervals so that this maximum can be set quite high?
+
