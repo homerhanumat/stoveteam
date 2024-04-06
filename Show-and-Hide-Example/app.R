@@ -27,7 +27,8 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("distPlot")
+           plotOutput("distPlot"),
+           hidden(verbatimTextOutput("report"))
         )
     )
 )
@@ -39,12 +40,14 @@ server <- function(input, output) {
     hide("some_widgets")
     show("revert")
     hide("start")
+    show("report")
   })
   
   observeEvent(input$revert, {
     show("some_widgets")
     show("start")
     hide("revert")
+    hide("report")
   })
 
     output$distPlot <- renderPlot({
@@ -56,6 +59,12 @@ server <- function(input, output) {
         hist(x, breaks = bins, col = 'darkgray', border = 'white',
              xlab = 'Waiting time to next eruption (in mins)',
              main = 'Histogram of waiting times')
+    })
+    
+    output$report <- renderPrint({
+      glue::glue("Your text was \"{input$text}\", 
+      and your number was {input$number}.
+      You cannot change them now.")
     })
 }
 
