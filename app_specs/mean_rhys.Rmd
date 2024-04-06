@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 ## Aim of the App
 
-The purpose of this app is to investigate the coverage properties of confidence intervals for $\mu$, the mean of a population, at various sample sizes and with consideration of a case when the population is not normally-distributed.
+The purpose of this app is to investigate the coverage properties of confidence intervals for $\mu$, the mean of a population, at various sample sizes and with consideration of cases when the population is not normally-distributed.
 
 ## Setup
 
