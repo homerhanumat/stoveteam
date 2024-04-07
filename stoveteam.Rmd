@@ -28,29 +28,38 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
+
+## utility function to get info on a single house:
+get_house <- function(i) {
+  vals <- read_excel(
+    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
+    range = "I15:L15",
+    sheet = paste0("HH", i, " Data"),
+    col_names = FALSE
+  ) %>% 
+    as.matrix() %>% 
+    t() %>% 
+    .[,1]
+  vals <- vals[!is.na(vals)]
+  data.frame(
+    house = rep(i, length(vals)),
+    wood = vals
+  )
+}
+
+## data frame with info on all houses.
+## each row is a house on a day:
+all_meas <- 
+  map_dfr(factor(1:16), get_house) %>% 
+  group_by(house) %>% 
+  mutate(mean_percap = mean(wood)) %>% 
+  mutate(deviation = wood - mean_percap)
 ```
 
 ## Introducton
 
 Coming soon!
 
-
-
-
-## Point Estimation and Sampling Variability
-
-Coming soon!
-
-<!-- Eivory does this app-->
-
-```{r sampling, echo=FALSE}
-shinyAppDir(
-  appDir = "sampling",
-  options = list(
-    width = "100%", height = 550
-  )
-)
-```
 
 
 ## Confidence Intervals for a Proportion
@@ -86,7 +95,23 @@ shinyAppDir(
 ```
 
 
-## Computation From the Data
+## What Mean are We Trying to Estimate?
+
+Coming soon!
+
+<!-- Eivory does this app-->
+
+```{r sampling, echo=FALSE}
+shinyAppDir(
+  appDir = "sampling",
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+
+## Confidence Intervals for the Mean of Household Means
 
 ### A Parametric Approach
 
@@ -137,60 +162,23 @@ Clearly, though,  there is an obstacle to using the above interval, since in our
 We can take a conservative approach, however.  Suppose that we were to simply throw away the final measurement for any day that had four measurements.  Then the number $J$ above could be set to three, and from the remaining data we could compute exact confidence intervals.
 
 ```{r}
-summary_data <- read_excel(
-  "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
-  range = "J22:Q38"
-)
-
-names(summary_data) <-
-  c(
-    "per_cap_mean",
-    "weighted_per_cap_mean",
-    "sd",
-    "var",
-    "weighted_var",
-    "days_measured",
-    "df",
-    "cov"
-  )
-
-
-find_replicates <- function(fn, n) {
-  replicates <- vector(mode = "list", length = n)
-  for (i in 1:length(replicates)) {
-    vals <- read_excel(
-      path = fn,
-      range = "I15:L15",
-      sheet = paste0("HH", i, " Data"),
-      col_names = FALSE
-    ) %>% 
-      as.matrix() %>% 
-      t() %>% 
-      .[,1]
-    replicates[[i]] <- vals[!is.na(vals)]
-  }
-  replicates
-}
-
-measures <- find_replicates(
-  fn = "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx",
-  n = nrow(summary_data)
-)
-
-compute_ci_1 <- function(data, level, use = NULL, r) {
-  n <- nrow(data)
-  multiplier <- qt((1 + level) / 2, df = n - 1)
+compute_ci_1 <- function(data, level, use = NULL) {
   if (is.null(use)) {
-    sample_mean <- sum(data$per_cap_mean) / n
-    ss_between <- sum((sample_mean - data$per_cap_mean)^2)
+    house_info <-
+      data %>% 
+      group_by(house) %>% 
+      summarize(mean = mean(wood))
   } else {
-    avgs <- numeric(length(r))
-    for (i in 1:length(r)) {
-      avgs[i] <- mean(r[[i]][1:use])
-    }
-    sample_mean <- sum(avgs) / n
-    ss_between <- sum((sample_mean - avgs)^2)
+    house_info <-
+      data %>% 
+      group_by(house) %>% 
+      slice_head(n = use) %>% 
+      summarize(mean = mean(wood))
   }
+  n <- nrow(house_info)
+  multiplier <- qt((1 + level) / 2, df = n - 1)
+  sample_mean <- mean(house_info$mean)
+  ss_between <- sum((sample_mean - house_info$mean)^2)
   margin <- multiplier * sqrt(ss_between / (n * (n - 1)))
   list(
     point_estimate = sample_mean, 
@@ -204,16 +192,14 @@ compute_ci_1 <- function(data, level, use = NULL, r) {
 
 ## try it out:
 res <- compute_ci_1(
-  data = summary_data, 
+  data = all_meas, 
   level = 0.90,
-  use = 3,
-  r = measures
+  use = 3
 )
 
 res_all <- compute_ci_1(
-  data = summary_data, 
-  level = 0.90,
-  r = measures
+  data = all_meas, 
+  level = 0.90
 )
 ```
 
@@ -237,112 +223,85 @@ Recall that one of our assumptions was that the underlying population of mean pe
 Our sample size is only 16 households--somewhat small--so we should plot the sample to see whether there any indication of skewness in the population.  Below is a density plot of the sample:
 
 ```{r}
-ggplot(summary_data, aes(x = per_cap_mean)) +
+house_info <-
+  all_meas %>% 
+  group_by(house) %>% 
+  summarize(mean = mean(wood), J = n())
+ggplot(house_info, aes(x = mean)) +
   geom_density(fill = "skyblue") +
   geom_rug()
 ```
 
 The sample has a strong right-skew, indicating that the population could be strongly right-skewed as well.
 
-In future studies it would be prudent to take a larger sample of households, perhaps 30 or so.
-
-### The Bootstrap
-
-Note:  More on the bootstrap in subsequent drafts.  Note that we get an interval rather similar to the one obtained above.
-
-
-```{r}
-lst <- vector(mode = "list", length = nrow(summary_data))
-for (i in 1:length(lst)) {
-  vals <- read_excel(
-    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
-    range = "I15:L15",
-    sheet = paste0("HH", i, " Data"),
-    col_names = FALSE
-  ) %>% 
-    as.matrix() %>% 
-    t() %>% 
-    .[,1]
-  vals <- vals[!is.na(vals)]
-  lst[[i]] <- vals
-}
-
-set.seed(2424)
-resampled_means <- function(data) {
-  n <- length(data)
-  means <- numeric(n)
-  for (i in 1:n) {
-    grp <- data[[sample(1:n, size = 1)]]
-    means[i] <-
-      sample(grp, size = length(grp), replace = TRUE) %>% 
-      mean()
-  }
-  means
-}
-
-## try it:
-
-bootstrap_resamples <- function(m, data) {
-  resamps <- numeric(m)
-  for (i in 1:m) {
-    resamps[i] <- mean(resampled_means(data = data))
-  }
-  resamps
-}
-
-number_resamples <- 2000
-resamps <- bootstrap_resamples(number_resamples, data = lst)
-
-level <- 0.90
-interval <- quantile(
-  resamps, 
-  probs = c((1 - level) / 2, (1 + level) / 2)
-)
-
-m <- mean(resamps)
-sd <- sqrt(sum((m - resamps)^2)/ length(resamps))
-```
-
-Using the bootstrap method with `r number_resamples` resamples, we find that:
-
-* The standard error is `r round(sd,3)`
-* The approximate 90%-confidence interval for $\mu$ extends from `r round(interval[1],3)` to `r round(interval[2],3)`.
-
-### Simulation Studies
-
-We have run some simulation studies to get some idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric 90%-confidence intervals constructed using all of the data actually cover the mean about 89% of the time.  It may be acceptable to use this interval formula and to keep all of the data.
+In future studies it would be prudent to take a larger sample of households, perhaps 30 or so.  (We are likely to take a much larger sample anyway, in order to meet the required precision.)
 
 ### The Mixed-Effect Approach
 
 Our problem may also be viewed as a very special case of a linear mixed-effects model.  Viewing the problem in this way and using the R-package **nlme**, we get the following results:
 
 ```{r}
-get_house <- function(i) {
-  vals <- read_excel(
-    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
-    range = "I15:L15",
-    sheet = paste0("HH", i, " Data"),
-    col_names = FALSE
-  ) %>% 
-    as.matrix() %>% 
-    t() %>% 
-    .[,1]
-  vals <- vals[!is.na(vals)]
-  data.frame(
-    house = rep(i, length(vals)),
-    wood = vals
-  )
-}
-
-df <- map_dfr(factor(1:16), get_house)
-
-mod <- nlme::lme(wood ~ 1, random = ~ 1 | house, data = df)
+mod <- nlme::lme(wood ~ 1, random = ~ 1 | house, data = all_meas)
 res_lme <- intervals(mod, level = 0.90)
 ```
 
 
 * The point estimate of $\mu$ is `r round(res_lme$fixed[1,"est."], 3)`
 * The 90%-confidence interval extends from `r round(res_lme$fixed[1,"lower"], 3)` to `r round(res_lme$fixed[1,"upper"], 3)`.
+
+### Simulation Studies
+
+We have run some simulation studies to get some idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric 90%-confidence intervals constructed using all of the data actually cover the mean about 89% of the time.  It should be acceptable to use this interval formula and to keep all of the data.  (In the computations for the mixed-effects model this is, in fact, done.)
+
+### The Bootstrap
+
+Note:  More on the bootstrap in subsequent drafts.  Note that we get an interval rather similar to the ones obtained above.
+
+
+```{r bootstrap, cache = TRUE}
+## estimate within-household variance:
+sd_w <-
+  all_meas %>% 
+  group_by(house) %>% 
+  mutate(house_mean = mean(wood)) %>% 
+  summarize(n = n(), sum_sq = sum((wood - house_mean)^2)) %>% 
+  mutate(deg_freedom = n - 1) %>% 
+  summarize(var = sum(sum_sq * deg_freedom) / sum(deg_freedom)) %>% 
+  pull(var) %>% 
+  sqrt()
+
+## get household means and measurement-numbers:
+house_info <-
+  all_meas %>% 
+  group_by(house) %>% 
+  summarize(mean = mean(wood), J = n())
+
+## get resamples
+B <- 4999
+resamples <- numeric(B)
+n <- nrow(house_info)
+houses <- numeric(n)
+for (i in 1:B) {
+  resampled_houses <-
+    house_info[sample(1:n), size = n]
+  resampled_mean <-
+    resampled_houses %>% 
+    mutate(mean_rs = mean(rnorm(J, mean = mean, sd = sd_w))) %>% 
+    summarize(xbar = mean(mean_rs)) %>% 
+    pull(xbar)
+  resamples[i] <- resampled_mean
+}
+
+## compute a percentile bootstrap interval:
+level <- 0.90
+interval <- quantile(resamples, probs = c(0.05, 0.95))
+```
+
+Using the bootstrap method with `r B` resamples, we find that:
+
+* The approximate 90%-confidence interval for $\mu$ extends from `r round(interval[1],3)` to `r round(interval[2],3)`.
+
+
 
 ### Further Thoughts
 

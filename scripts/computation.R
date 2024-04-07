@@ -241,167 +241,11 @@ sim_t2(
   reps = 10000
 )
 
-## basic bootstrap
-lst <- vector(mode = "list", length = nrow(summary_data))
-for (i in 1:length(lst)) {
-  vals <- read_excel(
-    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
-    range = "I15:L15",
-    sheet = paste0("HH", i, " Data"),
-    col_names = FALSE
-  ) %>% 
-    as.matrix() %>% 
-    t() %>% 
-    .[,1]
-  vals <- vals[!is.na(vals)]
-  lst[[i]] <- vals
-}
+## bootstrap ----
 
-resampled_means <- function(data) {
-  n <- length(data)
-  means <- numeric(n)
-  for (i in 1:n) {
-    grp <- data[[sample(1:n, size = 1)]]
-    means[i] <-
-      sample(grp, size = length(grp), replace = TRUE) %>% 
-      mean()
-  }
-  means
-}
-
-## try it:
-resampled_means(data = lst)
-
-bootstrap_resamples <- function(m, data) {
-  resamps <- numeric(m)
-  for (i in 1:m) {
-    resamps[i] <- mean(resampled_means(data = data))
-  }
-  resamps
-}
-
-resamps <- bootstrap_resamples(2000, data = lst)
-
-level <- 0.90
-interval <- quantile(
-  resamps, 
-  probs = c((1-level) / 2, (1 + level) / 2)
-)
-
-interval
-
-m <- mean(resamps)
-se <- sqrt(sum((m - resamps)^2) / length(resamps))
-se
-
-ggplot(data.frame(resamps), aes(x = resamps)) +
-  geom_density()
-
-## another ci approach
-lst <- vector(mode = "list", length = nrow(summary_data))
-for (i in 1:length(lst)) {
-  vals <- read_excel(
-    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
-    range = "I15:L15",
-    sheet = paste0("HH", i, " Data"),
-    col_names = FALSE
-  ) %>% 
-    as.matrix() %>% 
-    t() %>% 
-    .[, 1]
-  vals <- vals[!is.na(vals)]
-  lst[[i]] <- vals
-}
-
-
-## resamples
-
-xbarbar <- mean(summary_data$per_cap_mean)
-
-resampled_means <- function(data) {
-  n <- length(data)
-  diffs <- numeric()
-  for (i in 1:length(data)) {
-    vals <- data[[i]]
-    if (length(vals) == 1) next
-    diffs <- c(diffs, vals - mean(vals))
-  }
-  means <- numeric(n)
-  for (i in 1:n) {
-    grp <- data[[sample(1:n, size = 1)]]
-    rd <- sample(diffs, size = length(grp), replace = TRUE)
-    means[i] <- mean(rd) + mean(grp)
-  }
-  means
-}
-
-bootstrap_ts <- function(m, data, theta_hat) {
-  n <- length(data)
-  ts <- numeric(m)
-  for (i in 1:m) {
-    res_means <- resampled_means(data = data)
-    thetahathat <- mean(res_means)
-    ss <- sum((thetahathat - res_means)^2)
-    ts[i] <- (thetahathat - theta_hat) / sqrt(ss / (n * (n - 1)))
-  }
-  ts
-}
-
-m <- 1999
-level = 0.90
-
-t_star <- bootstrap_ts(
-  m = m,
-  data = lst,
-  theta_hat = xbarbar
-)
-
-crit <- quantile(t_star, probs = c((1 - level) / 2, (1 + level) / 2))
-n <- nrow(summary_data)
-denom <- sqrt(sum(
-  (xbarbar - summary_data$per_cap_mean)^2) / (n * ( n - 1)
-))
-interval <- xbarbar - rev(crit) * denom
-names(interval) = c("lower", "upper")
-
-## usage and number of people:
-adults <- numeric()
-dry_wood_pc <- numeric()
-for (i in 1:nrow(summary_data)) {
-  vals <- read_excel(
-    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
-    range = "I15:L15",
-    sheet = paste0("HH", i, " Data"),
-    col_names = FALSE
-  ) %>% 
-    as.matrix() %>% 
-    t() %>% 
-    .[,1]
-  vals <- vals[!is.na(vals)]
-  dry_wood_pc <- c(dry_wood_pc, vals)
-}
-for (i in 1:nrow(summary_data)) {
-  vals <- read_excel(
-    "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
-    range = "I11:L11",
-    sheet = paste0("HH", i, " Data"),
-    col_names = FALSE
-  ) %>% 
-    as.matrix() %>% 
-    t() %>% 
-    .[,1]
-  vals <- vals[!is.na(vals)]
-  adults <- c(adults, vals)
-}
-
-df <- data.frame(
-  x = adults,
-  y = dry_wood_pc
-)
-ggplot(df, aes(x = x, y = y)) +
-  geom_point() +
-  geom_smooth()
-
+## get all of the data:
+library(tidyverse)
+library(readxl)
 get_house <- function(i) {
   vals <- read_excel(
     "st_files/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx", 
@@ -419,25 +263,45 @@ get_house <- function(i) {
   )
 }
 
-df <- map_dfr(factor(1:16), get_house)
+all_meas <- 
+  map_dfr(factor(1:16), get_house) %>% 
+  group_by(house) %>% 
+  mutate(mean_percap = mean(wood)) %>% 
+  mutate(deviation = wood - mean_percap)
 
-library(nlme)
-mod <- nlme::lme(wood ~ 1, random = ~ 1 | house, data = df)
-summary(mod)
-res_lme <- intervals(mod, level = 0.90)
-library(lmeresampler)
-re_boot  <- bootstrap(
-  mod, .f = nlme::random.effects, 
-  type = "case",
-  B = 100,
-  resample = c(TRUE, TRUE)
-)
-summary(re_boot)
-confint(
-  re_boot,
-  level = 0.90
-)
+## estimate within-household variance:
+sd_w <-
+  all_meas %>% 
+  group_by(house) %>% 
+  mutate(house_mean = mean(wood)) %>% 
+  summarize(n = n(), sum_sq = sum((wood - house_mean)^2)) %>% 
+  mutate(deg_freedom = n - 1) %>% 
+  summarize(var = sum(sum_sq * deg_freedom) / sum(deg_freedom)) %>% 
+  pull(var) %>% 
+  sqrt()
 
-vcmodB <- nlme::lme(mathAge11 ~ 1, random = ~ 1 | school, data = jsp728)
-lme_cases_boot2 <- bootstrap(vcmodB, .f = fixef, type = "case", B = 100, resample = c(TRUE, TRUE))
-lme_cases_boot2
+## get household means and measurement-numbers:
+house_info <-
+  all_meas %>% 
+  group_by(house) %>% 
+  summarize(mean = mean(wood), J = n())
+
+## get resamples
+B <- 4999
+resamples <- numeric(B)
+n <- nrow(house_info)
+houses <- numeric(n)
+for (i in 1:B) {
+  resampled_houses <-
+    house_info[sample(1:n), size = n]
+  resampled_mean <-
+    resampled_houses %>% 
+    mutate(mean_rs = mean(rnorm(J, mean = mean, sd = sd_w))) %>% 
+    summarize(xbar = mean(mean_rs)) %>% 
+    pull(xbar)
+  resamples[i] <- resampled_mean
+}
+
+## compute a percentile bootstrap interval:
+level <- 0.90
+interval <- quantile(resamples, probs = c(0.05, 0.95))
