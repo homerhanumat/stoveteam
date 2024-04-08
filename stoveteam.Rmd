@@ -8,6 +8,7 @@ output:
     toc_float: true
     toc_collapsed: true
     toc_depth: 3
+    number_sections: true
 runtime: shiny
 resource_files:
 - computation/app.R
@@ -64,13 +65,13 @@ all_meas <-
   mutate(deviation = wood - mean_percap)
 ```
 
-## Introducton
+# Introducton
 
 Coming soon!
 
 
 
-## Confidence Intervals for a Proportion
+# Confidence Intervals for a Proportion
 
 Coming soon!
 
@@ -86,7 +87,7 @@ Coming soon!
 ```
 
 
-## Confidence Intervals for the Mean
+# Confidence Intervals for the Mean
 
 Coming soon!
  
@@ -103,27 +104,14 @@ Coming soon!
 ```
 
 
-## What Mean are We Trying to Estimate?
-
-Coming soon!
-
-<!-- Eivory does this app-->
-
-```{r sampling, echo=FALSE}
-# shinyAppDir(
-#   appDir = "sampling",
-#   options = list(
-#     width = "100%", height = 550
-#   )
-# )
-```
 
 
-## Confidence Intervals for the Mean of Household Means
 
-### A Parametric Approach
+# Confidence Intervals for the Mean of Household Means
 
-We imagine a large population of households.  Each household $h$ in the population has a mean per-capita daily usage of wood, which we will denote $\mu_h$.  Of course $\mu_h$ varies from one household to another.  Let $\mu$ denote the mean of all these mean per-capita daily usages.  $\mu$ is the number that we are trying to estimate and for which we desire to form a confidence interval, based upon the data we have collected.
+## A Parametric Approach
+
+We imagine a large population of households.  Each household $h$ in the population has a mean per-capita daily usage of wood, which we will denote $\mu_h$.  Of course $\mu_h$ varies from one household to another.  Let $\mu$ denote the mean of all these mean per-capita daily usages.  $\mu$ is the number that we are trying to estimate and for which we desire to form a confidence interval, based upon the data we have collected.  (**Note:** See the Appendix for more on why this is the appropriate parameter.)
 
 We make the assumption that the population of $\mu_h$-values is normally distributed, with mean $\mu$ and some unknown standard deviation $\sigma_b$.  (The subscript $b$ calls to mind that the mean daily per-capita usage varies *between* households, i.e., from one household to another.)
 
@@ -224,7 +212,7 @@ When we keep all of the measurements, we find that:
 * The 90%-confidence interval extends from `r round(res_all$interval[1], 3)` to `r round(res_all$interval[2], 3)`.
 * The margin of error for the above interval is `r round(res_all$margin, 3)`.
 
-### A Caution
+## A Caution
 
 Recall that one of our assumptions was that the underlying population of mean per-capita household usages was normally distributed.  In practice, no population distribution is ever exactly normal.  We can take some comfort from statistical theory, which assures us that even if the population is not normal, the actual coverage-properties of our confidence intervals converge to the advertised coverage-properties as sample size increases to infinity. Nonetheless, when the sample size is small and the population distribution differs significantly from normal (especially if it is skewed in one direction or another) then there may be a significant difference between actual and advertised performance.
 
@@ -244,9 +232,9 @@ The sample has a strong right-skew, indicating that the population could be stro
 
 In future studies it would be prudent to take a larger sample of households, perhaps 30 or so.  (We are likely to take a much larger sample anyway, in order to meet the required precision.)
 
-### The Mixed-Effect Approach
+## The Random-Effect Approach
 
-Our problem may also be viewed as a very special case of a linear mixed-effects model.  Viewing the problem in this way and using the R-package **nlme**, we get the following results:
+Our problem may also be viewed as a very special case of a linear random-effects model.  Viewing the problem in this way and using the R-package **nlme**, we get the following results:
 
 ```{r}
 mod <- nlme::lme(wood ~ 1, random = ~ 1 | house, data = all_meas)
@@ -257,11 +245,11 @@ res_lme <- intervals(mod, level = 0.90)
 * The point estimate of $\mu$ is `r round(res_lme$fixed[1,"est."], 3)`
 * The 90%-confidence interval extends from `r round(res_lme$fixed[1,"lower"], 3)` to `r round(res_lme$fixed[1,"upper"], 3)`.
 
-### Simulation Studies
+## Simulation Studies
 
 We have conducted some simulation studies to get an idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric 90%-confidence intervals constructed using all of the data actually cover the mean about 89% of the time.  It should be acceptable to use this interval formula and to keep all of the data.  (In the computations for the mixed-effects model this is, in fact, done.)
 
-### The Bootstrap
+## The Bootstrap
 
 The *bootstrap* is a general strategy for statistical inference that be implemented with little or nothing in the way modeling assumptions concerning the process that generates one's data, other than that the sampling is done in a controlled and quantifiable random fashion.  It relies on the fact that, when the data are sampled randomly from the population, then its distribution is liable to resemble approximately the distribution of the population itself.
 
@@ -270,7 +258,7 @@ In our situation we can design a version of the bootstrap that retains the assum
 The recipe for a 90%-confidence interval is as follows:
 
 1. Use the deviations of the daily measurements from the mean of their respective households to estimate $s_w$, the standard deviation of the measurments within any fixed household.
-1. Select a reasonably large number $B$ (we will choose $B=4999$), and perform the following process $B$ times:
+1. Select a reasonably large number $B$ (we will choose $B=1999$), and perform the following process $B$ times:
     * Sample 16 households at random and with replacement, from the the sixteen households in the sample.  (This is called "re-sampling".)
     * For each household $h_i$in the re-sample, $1 \leq i \leq 16$, generate $J_i$ random values from a normal distribution with mean $\mu_i$ (the mean per-capita usage for household $h_i$) and standard deviation $s_w$, and compute the mean (denoted $\bar{x}^*_i$) of these values.  These are the "re-sampled means".
     * Compute the mean $\bar{\bar{x}}^*$ of these re-sampled means.
@@ -278,7 +266,7 @@ The recipe for a 90%-confidence interval is as follows:
 We now have $B$ means.  We compute the 5th and 95th percentiles of this set of numbers, and use them as the lower and upper bounds respectively of a confidence interval for $\mu$.  Bootstrap theory guarantees that as the number of households sampled increases, the probability that such an interval contains $\mu$ converges to 90%.
 
 
-```{r bootstrap, cache = TRUE}
+```{r bootstrap}
 ## set a seed:
 set.seed(5656)
 ## estimate within-household variance:
@@ -299,7 +287,7 @@ house_info <-
   summarize(mean = mean(wood), J = n())
 
 ## get resamples
-B <- 4999
+B <- 1999
 resamples <- numeric(B)
 n <- nrow(house_info)
 houses <- numeric(n)
@@ -325,7 +313,7 @@ We find that:
 
 The fact that the bootstrap with its relatively loose assumptions concerning the population structure yields about the same confidence interval as the two parametric methods covered previously should give us further assurance that it is reasonable to use the parametric intervals.
 
-### Further Thoughts
+# Further Thoughts
 
 We might be able to use the data we have to research how to strike the best balance between the number of sampled households and the number of measurements at each household.  (For example, if a researcher could equally well vist two households for two days each in not much more time than it takes to visit one household for four days, could this provide more precise estimates?)
 
@@ -339,3 +327,53 @@ We might be able to use the data we have to research how to strike the best bala
 #   )
 # )
 ```
+
+# Appendix
+
+## What Parameter Should We Estimate? {#what-parameter}
+
+Someone might argue that, instead of considering the units of study to be the population to be all of the households and estimating the mean of the household per-capita mean daily usage, we should consider the units of study to be household-days, i.e,, each unit is a given day in a given household when its cook-stove is used.  Then the population would be the set of all household-days, and the parameter to be estimated is the mean of the usages over that set.
+
+In this case we would have to consider what sort of sample we have drawn from that population.  Given that we have randomly sampled households and then measured usage for 3-4 days at each household, we are looking at what is known as a "cluster" sample.
+
+Now it is possible to treat a cluster sample as a simple random sample, provided that it is reasonable to believe that the cluster-units---for us: the households in the population---are similar with respect to their per-capita daily usage of wood.
+
+But are the households similar?  One way to investigate this question is to make use of the fact that if the households *were* similar, then each one of the observed per-capita daily measurments could have been observed at any of the houses in the sample---not just at the house where it was actually observed.
+
+in the app below, each time the user presses the action button the observed measurements in the actual study are scrambled randomly among the sample households.  Each household $h_i$, where $1 \leq i \leq 16$, gets the same number $J_i$ of measurements that it had in the actual study, but these $J_i$ measurements are a random sample form the 57 measurments in the study.  The app then computes the average of the measurements for each household and makes a density plot (right column in the main panel) of these 16 averages.  For comparison, a density plot of the 16 averages in the actual study is shown in the left column of the main panel.
+
+Try the app many times, comparing the right and left columns as you go.
+
+<!-- Eivory does this app-->
+
+```{r sampling, echo=FALSE}
+# shinyAppDir(
+#   appDir = "sampling",
+#   options = list(
+#     width = "100%", height = 550
+#   )
+# )
+```
+
+You will probably notice that, on the whole the averages from scrambled measurements are much less spread apart from each other than are the averages from the actual study.  This is happening because the households are *not* similar with respect to usage:  some households use more wood per-capita on average than do other houses.
+
+Statisticians might suggest that we quantify the strength of the evidence provided by the data for dis-similarity across households.  One possible way to accomplish this is to compare two models of wood-usage:
+
+* a "null" linear model of usage: a linear model where the response variable is the usage and there are no predictor varaibles;
+* a "random-effect" model: a model where the response variable is usage and the predictor variable is the household at which the usage was observed, with the mean usage for each houshold assumed to be normally distributed with mean $\mu$ and some unknown standard deviation).
+
+The comparison is carried out through an *analysis of variance*, which compares how well each model does at the task of "fitting" to the observed data.  When we do the analysis of variance with the R-package **nlme**, we get the following results:
+
+```{r}
+mod_null <- lm(wood ~ 1, data = all_meas)
+mod_rf <- lme(wood ~ 1, random = ~ 1 | house, data = all_meas)
+res <- anova(mod_rf, mod_null)
+df <- as.data.frame(res)
+knitr::kable(df[, -(1:5)])
+```
+
+Among other things, the model computes the natural logarithm of the likelihood of getting the observed data, under each of the model assumptions.  It then states the ratio of these log-likelihoods (log-likelihood for the random-effect model divided by log-likelihood for the null model) .
+
+We see that the ratio is approximately `r round(res$L.Ratio[2], 3)`, quite a large value.  In fact, if the households in the population are in fact uniform with respect to mean daily per-capita usage of wood, then the probabilty of getting that ratio or higher is extremely small:  less than 0.0001 in fact.
+
+We conclude that the data provide extrememly strong evidence that households in the population are dis-similar in their wood-usage.  Thus it is better to choose households as our units of study and to attempt estimate $\mu$, the mean of their mean daily per-capita usages.
