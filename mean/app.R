@@ -36,8 +36,8 @@ ui <- fluidPage(theme = bslib::bs_theme(primary = "orange"),
                                    "[insert output here]",
                                    showcase = bsicons::bs_icon("emoji-heart-eyes"),
                                    theme = "bg-gradient-green-teal",
-                                   height = "100%",
-                                   showcase_layout = "bottom"
+                                   height = "100%"
+                                   #showcase_layout = "bottom"
                                  )
                                )
                              )),
@@ -52,8 +52,8 @@ ui <- fluidPage(theme = bslib::bs_theme(primary = "orange"),
                                      "[insert output here]",
                                      showcase = bsicons::bs_icon("emoji-heart-eyes"),
                                      theme = "bg-gradient-green-teal",
-                                     height = "100%",
-                                     showcase_layout = "bottom"
+                                     height = "100%"
+                                     #showcase_layout = "bottom"
                                    )
                                  ),
                                  column(
@@ -63,8 +63,8 @@ ui <- fluidPage(theme = bslib::bs_theme(primary = "orange"),
                                      "[insert output here]",
                                      showcase = bsicons::bs_icon("emoji-heart-eyes"),
                                      theme = "bg-gradient-green-teal",
-                                     height = "100%",
-                                     showcase_layout = "bottom"
+                                     height = "100%"
+                                     #showcase_layout = "bottom"
                                    )
                                  ),
                                  column(
@@ -74,8 +74,8 @@ ui <- fluidPage(theme = bslib::bs_theme(primary = "orange"),
                                      "[insert output here]",
                                      showcase = bsicons::bs_icon("emoji-frown"),
                                      theme = "bg-gradient-red-orange",
-                                     height = "100%",
-                                     showcase_layout = "bottom"
+                                     height = "100%"
+                                     #showcase_layout = "bottom"
                                    )
                                  )
                                )

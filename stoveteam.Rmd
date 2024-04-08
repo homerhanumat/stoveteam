@@ -2,7 +2,7 @@
 title: "Notes on Confidence Intervals"
 author: "CSC 400, Spring 2024"
 date: "`r Sys.Date()`"
-output: 
+output:
   html_document:
     toc: true
     toc_float: true
@@ -14,6 +14,10 @@ resource_files:
 - mean/app.R
 - sampling/app.R
 - proportion/app.R
+- stoveteam_cache/html/__packages
+- stoveteam_cache/html/bootstrap_7487fcb4e1908ed91ad963ce5124f34c.RData
+- stoveteam_cache/html/bootstrap_7487fcb4e1908ed91ad963ce5124f34c.rdb
+- stoveteam_cache/html/bootstrap_7487fcb4e1908ed91ad963ce5124f34c.rdx
 ---
 
 ```{r setup, include=FALSE}
@@ -23,6 +27,10 @@ library(tidyverse)
 library(readxl)
 library(shiny)
 library(nlme)
+## for menas app:
+##library(bslib)
+##library(bsicons)
+## knitr options:
 knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
@@ -69,12 +77,12 @@ Coming soon!
 <!-- Finn does this app-->
 
 ```{r proportion, echo=FALSE}
-shinyAppDir(
-  appDir = "proportion",
-  options = list(
-    width = "100%", height = 550
-  )
-)
+# shinyAppDir(
+#   appDir = "proportion",
+#   options = list(
+#     width = "100%", height = 550
+#   )
+# )
 ```
 
 
@@ -86,12 +94,12 @@ Coming soon!
 
 
 ```{r mean, echo=FALSE}
-shinyAppDir(
-  appDir = "mean",
-  options = list(
-    width = "100%", height = 550
-  )
-)
+# shinyAppDir(
+#   appDir = "mean",
+#   options = list(
+#     width = "100%", height = 550
+#   )
+# )
 ```
 
 
@@ -102,12 +110,12 @@ Coming soon!
 <!-- Eivory does this app-->
 
 ```{r sampling, echo=FALSE}
-shinyAppDir(
-  appDir = "sampling",
-  options = list(
-    width = "100%", height = 550
-  )
-)
+# shinyAppDir(
+#   appDir = "sampling",
+#   options = list(
+#     width = "100%", height = 550
+#   )
+# )
 ```
 
 
@@ -251,14 +259,28 @@ res_lme <- intervals(mod, level = 0.90)
 
 ### Simulation Studies
 
-We have run some simulation studies to get some idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric 90%-confidence intervals constructed using all of the data actually cover the mean about 89% of the time.  It should be acceptable to use this interval formula and to keep all of the data.  (In the computations for the mixed-effects model this is, in fact, done.)
+We have conducted some simulation studies to get an idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric 90%-confidence intervals constructed using all of the data actually cover the mean about 89% of the time.  It should be acceptable to use this interval formula and to keep all of the data.  (In the computations for the mixed-effects model this is, in fact, done.)
 
 ### The Bootstrap
 
-Note:  More on the bootstrap in subsequent drafts.  Note that we get an interval rather similar to the ones obtained above.
+The *bootstrap* is a general strategy for statistical inference that be implemented with little or nothing in the way modeling assumptions concerning the process that generates one's data, other than that the sampling is done in a controlled and quantifiable random fashion.  It relies on the fact that, when the data are sampled randomly from the population, then its distribution is liable to resemble approximately the distribution of the population itself.
+
+In our situation we can design a version of the bootstrap that retains the assumptions that the daily per-capita measurements in each household are normally distributed with a standatd deviation that does not depend on the household, but let go of the assumption that the mean per-capita usages for the population of households has a normal distribution.
+
+The recipe for a 90%-confidence interval is as follows:
+
+1. Use the deviations of the daily measurements from the mean of their respective households to estimate $s_w$, the standard deviation of the measurments within any fixed household.
+1. Select a reasonably large number $B$ (we will choose $B=4999$), and perform the following process $B$ times:
+    * Sample 16 households at random and with replacement, from the the sixteen households in the sample.  (This is called "re-sampling".)
+    * For each household $h_i$in the re-sample, $1 \leq i \leq 16$, generate $J_i$ random values from a normal distribution with mean $\mu_i$ (the mean per-capita usage for household $h_i$) and standard deviation $s_w$, and compute the mean (denoted $\bar{x}^*_i$) of these values.  These are the "re-sampled means".
+    * Compute the mean $\bar{\bar{x}}^*$ of these re-sampled means.
+
+We now have $B$ means.  We compute the 5th and 95th percentiles of this set of numbers, and use them as the lower and upper bounds respectively of a confidence interval for $\mu$.  Bootstrap theory guarantees that as the number of households sampled increases, the probability that such an interval contains $\mu$ converges to 90%.
 
 
 ```{r bootstrap, cache = TRUE}
+## set a seed:
+set.seed(5656)
 ## estimate within-household variance:
 sd_w <-
   all_meas %>% 
@@ -297,11 +319,11 @@ level <- 0.90
 interval <- quantile(resamples, probs = c(0.05, 0.95))
 ```
 
-Using the bootstrap method with `r B` resamples, we find that:
+We find that:
 
 * The approximate 90%-confidence interval for $\mu$ extends from `r round(interval[1],3)` to `r round(interval[2],3)`.
 
-
+The fact that the bootstrap with its relatively loose assumptions concerning the population structure yields about the same confidence interval as the two parametric methods covered previously should give us further assurance that it is reasonable to use the parametric intervals.
 
 ### Further Thoughts
 
@@ -310,10 +332,10 @@ We might be able to use the data we have to research how to strike the best bala
 <!-- Christara does this app-->
 
 ```{r computation, echo=FALSE}
-shinyAppDir(
-  appDir = "computation",
-  options = list(
-    width = "100%", height = 550
-  )
-)
+# shinyAppDir(
+#   appDir = "computation",
+#   options = list(
+#     width = "100%", height = 550
+#   )
+# )
 ```
