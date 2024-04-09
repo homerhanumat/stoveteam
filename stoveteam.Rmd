@@ -3,22 +3,21 @@ title: "Notes on Confidence Intervals"
 author: "CSC 400, Spring 2024"
 date: "`r Sys.Date()`"
 output:
+  rmdformats::readthedown:
+    highlight: kate
+    toc_depth: 2
   html_document:
-    toc: true
-    toc_float: true
-    toc_collapsed: true
-    toc_depth: 3
-    number_sections: true
-runtime: shiny
+    #toc: true
+    #toc_float: true
+    #toc_collapsed: true
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs", output_file = "index.html") })
+#runtime: shiny
 resource_files:
 - computation/app.R
 - mean/app.R
 - sampling/app.R
 - proportion/app.R
-- stoveteam_cache/html/__packages
-- stoveteam_cache/html/bootstrap_7487fcb4e1908ed91ad963ce5124f34c.RData
-- stoveteam_cache/html/bootstrap_7487fcb4e1908ed91ad963ce5124f34c.rdb
-- stoveteam_cache/html/bootstrap_7487fcb4e1908ed91ad963ce5124f34c.rdx
 ---
 
 ```{r setup, include=FALSE}
@@ -266,7 +265,7 @@ The recipe for a 90%-confidence interval is as follows:
 We now have $B$ means.  We compute the 5th and 95th percentiles of this set of numbers, and use them as the lower and upper bounds respectively of a confidence interval for $\mu$.  Bootstrap theory guarantees that as the number of households sampled increases, the probability that such an interval contains $\mu$ converges to 90%.
 
 
-```{r bootstrap}
+```{r bootstrap, cache = TRUE}
 ## set a seed:
 set.seed(5656)
 ## estimate within-household variance:
