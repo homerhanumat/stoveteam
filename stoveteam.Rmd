@@ -64,7 +64,7 @@ all_meas <-
   mutate(deviation = wood - mean_percap)
 ```
 
-# Introducton
+# Introduction
 
 Coming soon!
 
@@ -338,7 +338,7 @@ We find that:
 
 The fact that the bootstrap with its relatively loose assumptions concerning the population structure yields about the same confidence interval as the two parametric methods covered previously should give us further assurance that it is reasonable to use the parametric intervals.
 
-# Sample Size
+## Sample Size
 
 The document *CDM-EB50-A30-STAN* specifies that confidence interval for a mean have a precision of no more than 10%.  In Section 12(b) of the doicument, precision for a confidence interval for the mean is defined as the margin of error divided by the sampl mean (multipled by 100 to convert to a percentage).
 
