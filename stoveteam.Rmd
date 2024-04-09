@@ -72,9 +72,32 @@ Coming soon!
 
 # Confidence Intervals for a Proportion
 
-From Section 12(a) of the document *CDM-EB50-A30-STAN*:
+There are many methods for computing a confidence interval for a population proportion $p$.  The document *CDM-EB67-A06-GUID* appears to assume (see Equation 7 near the bottom of page 71) the use of what is known as the *Wald Interval*:
+
+$$\left(\hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}, \hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\right),$$
+where:
+
+* $\hat{p} = x/n$ is the *sample proportion* (the number $x$ of successes in the sample divided by the sample size $n$);
+* $z^*$ is the percentile of the standard normal distribution appropriate to the desired level of confidence (for a 90%-confidence interval this is approximately `r round(qnorm(0.95), 3)`).
+
+**Note**:  Equation 7 actually included an attempt at the *finite population correction factor* but got the factor slightly wrong.  The interval with correction factor should be:
+
+$$\left(\hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}, \hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}\right),$$
+where $N$ is the number of households that were provided with stoves.
+
+Wald intervals don't have the best statistical properties:  for smaller sample sizes, and for population proportions that are near 0 or near 1, the nominal level of confidence of the intervals can differ significantly from their actual levels.  In the situation of our study the sample size is not very large, so it might be better to use a more sophisticated method.  (We recommend an Agresti-Coul interval.)
+
+## Sample Size
+
+Our estimate of $p$, the proportion of households in the population where the stove is still in use, is required to have a minimum precision of 10%.
+
+From Section 12(a) of the document *CDM-EB50-A30-STAN* we can infer a definition of precision:
 
 >As a relative unit when the parameter of interest is a proportion (or a percentage) For example, ± 10 per cent in relative units means that the interval around a proportion value of 70 per cent is 63 per cent to 77 per cent. A proportion can describe either of the two possible scenarios of the success rate (p) or the failure rate (1−p), for example (i) cookstove still operational or (ii) cookstove no longer operational. The project participants or the coordinating/managing entity may use the larger of the two proportions in the sample size calculation, that is (p) or (1−p), in any of the monitoring periods during the crediting period without having to revise the monitoring plan.
+
+We see that precision shold be calculated as:
+
+$$\frac{\text{margin of error}}{\max(\hat{p}, 1 - \hat{p})} \times 100 = \frac{z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}}{\max(\hat{p}, 1 - \hat{p})} \times 100.$$
 
 
 

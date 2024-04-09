@@ -1205,7 +1205,11 @@ margin-left: 0 !important;
       <ul>
       <li><a href="#introduction" id="toc-introduction">Introduction</a></li>
       <li><a href="#confidence-intervals-for-a-proportion" id="toc-confidence-intervals-for-a-proportion">Confidence
-      Intervals for a Proportion</a></li>
+      Intervals for a Proportion</a>
+      <ul>
+      <li><a href="#sample-size" id="toc-sample-size">Sample
+      Size</a></li>
+      </ul></li>
       <li><a href="#confidence-intervals-for-the-mean" id="toc-confidence-intervals-for-the-mean">Confidence Intervals
       for the Mean</a></li>
       <li><a href="#confidence-intervals-for-the-mean-of-household-means" id="toc-confidence-intervals-for-the-mean-of-household-means">Confidence
@@ -1218,7 +1222,7 @@ margin-left: 0 !important;
       <li><a href="#simulation-studies" id="toc-simulation-studies">Simulation Studies</a></li>
       <li><a href="#the-bootstrap" id="toc-the-bootstrap">The
       Bootstrap</a></li>
-      <li><a href="#sample-size" id="toc-sample-size">Sample
+      <li><a href="#sample-size-1" id="toc-sample-size-1">Sample
       Size</a></li>
       </ul></li>
       <li><a href="#further-thoughts" id="toc-further-thoughts">Further
@@ -1249,7 +1253,44 @@ margin-left: 0 !important;
 </div>
 <div id="confidence-intervals-for-a-proportion" class="section level1">
 <h1>Confidence Intervals for a Proportion</h1>
-<p>From Section 12(a) of the document <em>CDM-EB50-A30-STAN</em>:</p>
+<p>There are many methods for computing a confidence interval for a
+population proportion <span class="math inline">\(p\)</span>. The
+document <em>CDM-EB67-A06-GUID</em> appears to assume (see Equation 7
+near the bottom of page 71) the use of what is known as the <em>Wald
+Interval</em>:</p>
+<p><span class="math display">\[\left(\hat{p} - z^*
+\sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}, \hat{p} - z^*
+\sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\right),\]</span> where:</p>
+<ul>
+<li><span class="math inline">\(\hat{p} = x/n\)</span> is the <em>sample
+proportion</em> (the number <span class="math inline">\(x\)</span> of
+successes in the sample divided by the sample size <span class="math inline">\(n\)</span>);</li>
+<li><span class="math inline">\(z^*\)</span> is the percentile of the
+standard normal distribution appropriate to the desired level of
+confidence (for a 90%-confidence interval this is approximately
+1.645).</li>
+</ul>
+<p><strong>Note</strong>: Equation 7 actually included an attempt at the
+<em>finite population correction factor</em> but got the factor slightly
+wrong. The interval with correction factor should be:</p>
+<p><span class="math display">\[\left(\hat{p} - z^*
+\sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}, \hat{p} -
+z^* \sqrt{\frac{\hat{p}(1 -
+\hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}\right),\]</span> where <span class="math inline">\(N\)</span> is the number of households that were
+provided with stoves.</p>
+<p>Wald intervals don’t have the best statistical properties: for
+smaller sample sizes, and for population proportions that are near 0 or
+near 1, the nominal level of confidence of the intervals can differ
+significantly from their actual levels. In the situation of our study
+the sample size is not very large, so it might be better to use a more
+sophisticated method. (We recommend an Agresti-Coul interval.)</p>
+<div id="sample-size" class="section level2">
+<h2>Sample Size</h2>
+<p>Our estimate of <span class="math inline">\(p\)</span>, the
+proportion of households in the population where the stove is still in
+use, is required to have a minimum precision of 10%.</p>
+<p>From Section 12(a) of the document <em>CDM-EB50-A30-STAN</em> we can
+infer a definition of precision:</p>
 <blockquote>
 <p>As a relative unit when the parameter of interest is a proportion (or
 a percentage) For example, ± 10 per cent in relative units means that
@@ -1262,7 +1303,14 @@ larger of the two proportions in the sample size calculation, that is
 (p) or (1−p), in any of the monitoring periods during the crediting
 period without having to revise the monitoring plan.</p>
 </blockquote>
+<p>We see that precision shold be calculated as:</p>
+<p><span class="math display">\[\frac{\text{margin of
+error}}{\max(\hat{p}, 1 - \hat{p})} \times 100 = \frac{z^*
+\sqrt{\frac{\hat{p}(1 -
+\hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}}{\max(\hat{p}, 1 - \hat{p})} \times
+100.\]</span></p>
 <!-- Finn does this app-->
+</div>
 </div>
 <div id="confidence-intervals-for-the-mean" class="section level1">
 <h1>Confidence Intervals for the Mean</h1>
@@ -1486,7 +1534,7 @@ interval as the two parametric methods covered previously should give us
 further assurance that it is reasonable to use the parametric
 intervals.</p>
 </div>
-<div id="sample-size" class="section level2">
+<div id="sample-size-1" class="section level2">
 <h2>Sample Size</h2>
 <p>The document <em>CDM-EB50-A30-STAN</em> specifies that confidence
 interval for a mean have a precision of no more than 10%. In Section
