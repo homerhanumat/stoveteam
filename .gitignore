@@ -5,3 +5,5 @@
 rsconnect
 .DS_Store
 *.html
+!docs/index/html
+
