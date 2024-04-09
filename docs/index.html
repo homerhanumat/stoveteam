@@ -1219,6 +1219,8 @@ margin-left: 0 !important;
       <li><a href="#the-bootstrap" id="toc-the-bootstrap">The
       Bootstrap</a></li>
       </ul></li>
+      <li><a href="#sample-size" id="toc-sample-size">Sample
+      Size</a></li>
       <li><a href="#further-thoughts" id="toc-further-thoughts">Further
       Thoughts</a></li>
       <li><a href="#appendix" id="toc-appendix">Appendix</a>
@@ -1247,7 +1249,19 @@ margin-left: 0 !important;
 </div>
 <div id="confidence-intervals-for-a-proportion" class="section level1">
 <h1>Confidence Intervals for a Proportion</h1>
-<p>Coming soon!</p>
+<p>From Section 12(a) of the document <em>CDM-EB50-A30-STAN</em>:</p>
+<blockquote>
+<p>As a relative unit when the parameter of interest is a proportion (or
+a percentage) For example, ± 10 per cent in relative units means that
+the interval around a proportion value of 70 per cent is 63 per cent to
+77 per cent. A proportion can describe either of the two possible
+scenarios of the success rate (p) or the failure rate (1−p), for example
+(i) cookstove still operational or (ii) cookstove no longer operational.
+The project participants or the coordinating/managing entity may use the
+larger of the two proportions in the sample size calculation, that is
+(p) or (1−p), in any of the monitoring periods during the crediting
+period without having to revise the monitoring plan.</p>
+</blockquote>
 <!-- Finn does this app-->
 </div>
 <div id="confidence-intervals-for-the-mean" class="section level1">
@@ -1331,12 +1345,25 @@ t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}}\right),\]</span></p>
 of the t-distribution with <span class="math inline">\(n-1\)</span>
 degrees of freedom that is appropriate for the desired level of
 confidence.</p>
-<p>Clearly, though, there is an obstacle to using the above interval,
-since in our study not all households were measured for the same number
-of days: the number of days was sometimes 3 and sometimes 4. Hence the
-random variable <span class="math inline">\(T\)</span> will not, for us,
-have an exact t-distribution. We won’t be able to derive confidence
-intervals with coverage-properties that are known exactly.</p>
+<p>The above formula assumes that the population-size is “infinite”. In
+fact, if the population is of some finite size <span class="math inline">\(N\)</span>, then to obtain an exact interval one
+would employ the <em>finite-poulation correction factor</em></p>
+<p><span class="math display">\[\sqrt{\frac{N-n}{N-1}}\]</span></p>
+<p>to the margin of error, obtaining:</p>
+<p><span class="math display">\[\left(\overline{\overline{X}} -
+t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}}\sqrt{\frac{N-n}{N-1}},\,
+\overline{\overline{X}} +
+t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}}\sqrt{\frac{N-n}{N-1}}\right).\]</span>
+The correction factor need only be incorporated when the sample size
+<span class="math inline">\(n\)</span> is a substantial fraction of the
+size of the population.</p>
+<p>Clearly, though, there is an obstacle to using either of the above
+intervals, since in our study not all households were measured for the
+same number of days: the number of days was sometimes 3 and sometimes 4.
+Hence the random variable <span class="math inline">\(T\)</span> will
+not, for us, have an exact t-distribution. We won’t be able to derive
+confidence intervals with coverage-properties that are known
+exactly.</p>
 <p>We can take a conservative approach, however. Suppose that we were to
 simply throw away the final measurement for any day that had four
 measurements. Then the number <span class="math inline">\(J\)</span>
@@ -1358,6 +1385,10 @@ measurements, we find that:</p>
 <li>The 90%-confidence interval extends from 2.747 to 3.902.</li>
 <li>The margin of error for the above interval is 0.578.</li>
 </ul>
+<p>As an example of the use of the finite population correction factor,
+suppose that there are 500 households in the population. Then when we
+keep all of the data and use the correction factor the interval shrinks
+a bit, extending from 2.756 to 3.893.</p>
 </div>
 <div id="a-caution" class="section level2">
 <h2>A Caution</h2>
@@ -1455,6 +1486,52 @@ interval as the two parametric methods covered previously should give us
 further assurance that it is reasonable to use the parametric
 intervals.</p>
 </div>
+</div>
+<div id="sample-size" class="section level1">
+<h1>Sample Size</h1>
+<p>The document <em>CDM-EB50-A30-STAN</em> specifies that confidence
+interval for a mean have a precision of no more than 10%. In Section
+12(b) of the doicument, precision for a confidence interval for the mean
+is defined as the margin of error divided by the sampl mean (multipled
+by 100 to convert to a percentage).</p>
+<p>Clearly we will want larger sample sizes in the future in order to
+attain the required precision.</p>
+<p>For the desired precision, from a population of size <span class="math inline">\(N\)</span> we would require a sample size <span class="math inline">\(n_d\)</span> such that:</p>
+<p><span class="math display">\[\frac{t_{n_d-1}^*\sqrt{\frac{SS_b}{n_d(n_d-1)}}\sqrt{\frac{N-n_d}{N-1}}}{\bar{\bar{x}}}
+\leq 0.10.\]</span></p>
+<p>Of course we have not taken the new sample yet, so we do not yet know
+what <span class="math inline">\(SS_b\)</span> and <span class="math inline">\(\bar{\bar{x}}\)</span> are. Hence we won’t be able
+to determine <span class="math inline">\(n\)</span> exactly.
+However:</p>
+<ul>
+<li>for <span class="math inline">\(SS_b/(n_d-1)\)</span> we will
+substitue an estimate, namely: the value for <span class="math inline">\(SS_b/(n-1)\)</span> that we obtained in the pilot
+study with sample size <span class="math inline">\(n\)</span>;</li>
+<li>for <span class="math inline">\(t_{n_d-1}^*\)</span>, will use <span class="math inline">\(t_{n-1}^*\)</span> (which is a bit larger, tending
+to result in an underestiamte of <span class="math inline">\(n_d\)</span>);</li>
+<li>for <span class="math inline">\(\bar{\bar{x}}\)</span> we will
+substitute the corresponding value that we got from the pilot
+study.</li>
+</ul>
+<p>Our inequality now looks like:</p>
+<p><span class="math display">\[\frac{t_{n-1}^*\sqrt{\frac{SS_b}{n_d(n-1)}}\sqrt{\frac{N-n_d}{N-1}}}{\bar{\bar{x}}}
+\leq 0.10.\]</span></p>
+<p>We solve the above inequality for <span class="math inline">\(n_d\)</span>, getting:</p>
+<p><span class="math display">\[n_d \geq
+\frac{(t_{n-1}^*)^2\frac{SS_b}{n-1}N}{0.10^2(\bar{\bar{x}})^2(N-1)+(t_{n-1}^*)^2\frac{SS_b}{n-1}}.\]</span></p>
+<p>If we choose not to employ a finite population correction factor, the
+the formula simplifies to:</p>
+<p><span class="math display">\[n_d \geq
+\frac{(t_{n-1}^*)^2\frac{SS_b}{n-1}}{0.10^2(\bar{\bar{x}})^2}.\]</span></p>
+<p>In practice we should choose a sample size significantly larger than
+<span class="math inline">\(n_d\)</span>, as the width of the resulting
+interval will be subject to chance variation in the sample itself and we
+want to minimize the chance of that width coming out too large.</p>
+<p><strong>Note</strong>: As a rough rule of thumb, the margin of error
+is inversely proportional to the square root of the number of households
+sampled. Thus in order to cut the marign of error in half (for example)
+we would have to sample roughly four times as many households as we did
+in the pilot study.</p>
 </div>
 <div id="further-thoughts" class="section level1">
 <h1>Further Thoughts</h1>
