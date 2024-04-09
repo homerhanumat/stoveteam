@@ -85,11 +85,11 @@ where:
 $$\left(\hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}, \hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}\right),$$
 where $N$ is the number of households that were provided with stoves.
 
-Wald intervals don't have the best statistical properties:  for smaller sample sizes, and for population proportions that are near 0 or near 1, the nominal level of confidence of the intervals can differ significantly from their actual levels.  In the situation of our study the sample size is not very large, so it might be better to use a more sophisticated method.  (We recommend an Agresti-Coul interval.)
+Wald intervals don't have the best statistical properties:  for smaller sample sizes, and for population proportions that are near 0 or near 1, the nominal level of confidence of the intervals can differ significantly from their actual levels.  In the situation of our study the sample size is not very large, so we recommend a more sophisticated method.  (An Agresti-Coul interval would be fine.)
 
 ## Sample Size
 
-Our estimate of $p$, the proportion of households in the population where the stove is still in use, is required to have a minimum precision of 10%.
+Our estimate of $p$, the proportion of households in the population where the stove is still in use, is required to have a minimum precision of 0.10.
 
 From Section 12(a) of the document *CDM-EB50-A30-STAN* we can infer a definition of precision:
 
@@ -97,8 +97,29 @@ From Section 12(a) of the document *CDM-EB50-A30-STAN* we can infer a definition
 
 We see that precision should be calculated as:
 
-$$\frac{\text{margin of error}}{\max(\hat{p}, 1 - \hat{p})} \times 100 = \frac{z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}}{\max(\hat{p}, 1 - \hat{p})} \times 100.$$
+$$\text{precision} = \frac{\text{margin of error}}{\max(\hat{p}, 1 - \hat{p})} = \frac{z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}}{\max(\hat{p}, 1 - \hat{p})}.$$
 
+We would like to derive a formula for the sample size $n_d$ required for the resulting confidence interval to have a precision not exceeding 0.10.  In order to derive the formula we must assume a fairly simple fornula for the margin of error, so we'll use the margin of error for Wald intervals, even if the confidence intervals we actually make are based on some other method.
+
+So we are looking for a value of $n_d$ such that:
+
+$$\frac{z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n_d}}\sqrt{\frac{N-n_d}{N-1}}}{\max(\hat{p}, 1 - \hat{p})} \leq 0.10.$$
+Of course, we won't know $\hat{p}$ until we actually take our samnple, so we need to replace occurences of $\hat{p}$ in the above inequalities with reasonable approximations.
+
+Now the precision is larger (i.e., "worse") when the denominator $\max(\hat{p}, 1 - \hat{p}$ is smallest, and this occurs when $\hat{p} = 0.50$.  Also the precision is larger when the numerator is largest, and this occurs when $\hat{p}(1-\hat{p})$ is largest, and this also occurs when $\hat{p} = 0.50$.  Therefore if we replace $\hat{p}$ with 0.50, we get an inequality
+
+$$\frac{z^* \sqrt{\frac{0.5(1 - 0.5)}{n_d}}\sqrt{\frac{N-n_d}{N-1}}}{\max(0.5, 1 - 0.5)} = \frac{z^*\sqrt{N-n_d}}{\sqrt{n_d(N-1)}}\leq 0.10.$$
+which, when solved for $n_d$, results in a sample size that is conservative in the sense that it is liable to be larger than needed.
+
+Solving the inequality for $n_d$, we get:
+
+$$n_d \geq \frac{(z^*)^2N}{0.10^2(N-1) +(z^*)^2}.$$
+
+This agrees with the formula suggested on page 28 of *CDM-EB50-A30-STAN*, when one replaces the $p$ in that formula with 0.50.
+
+For example, if we plan to make a 90%-confidence interval and the size of the population is $N=500$, then the sample size needs to be at least
+
+$$\frac{1.645^2\times 500}{0.10^2\times 499 +1.645^2} \approx 176.$$
 
 
 <!-- Finn does this app-->

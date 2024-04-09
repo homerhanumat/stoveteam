@@ -1282,13 +1282,13 @@ provided with stoves.</p>
 smaller sample sizes, and for population proportions that are near 0 or
 near 1, the nominal level of confidence of the intervals can differ
 significantly from their actual levels. In the situation of our study
-the sample size is not very large, so it might be better to use a more
-sophisticated method. (We recommend an Agresti-Coul interval.)</p>
+the sample size is not very large, so we recommend a more sophisticated
+method. (An Agresti-Coul interval would be fine.)</p>
 <div id="sample-size" class="section level2">
 <h2>Sample Size</h2>
 <p>Our estimate of <span class="math inline">\(p\)</span>, the
 proportion of households in the population where the stove is still in
-use, is required to have a minimum precision of 10%.</p>
+use, is required to have a minimum precision of 0.10.</p>
 <p>From Section 12(a) of the document <em>CDM-EB50-A30-STAN</em> we can
 infer a definition of precision:</p>
 <blockquote>
@@ -1303,12 +1303,48 @@ larger of the two proportions in the sample size calculation, that is
 (p) or (1−p), in any of the monitoring periods during the crediting
 period without having to revise the monitoring plan.</p>
 </blockquote>
-<p>We see that precision shold be calculated as:</p>
-<p><span class="math display">\[\frac{\text{margin of
-error}}{\max(\hat{p}, 1 - \hat{p})} \times 100 = \frac{z^*
-\sqrt{\frac{\hat{p}(1 -
-\hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}}{\max(\hat{p}, 1 - \hat{p})} \times
-100.\]</span></p>
+<p>We see that precision should be calculated as:</p>
+<p><span class="math display">\[\text{precision} = \frac{\text{margin of
+error}}{\max(\hat{p}, 1 - \hat{p})} = \frac{z^* \sqrt{\frac{\hat{p}(1 -
+\hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}}{\max(\hat{p}, 1 -
+\hat{p})}.\]</span></p>
+<p>We would like to derive a formula for the sample size <span class="math inline">\(n_d\)</span> required for the resulting confidence
+interval to have a precision not exceeding 0.10. In order to derive the
+formula we must assume a fairly simple fornula for the margin of error,
+so we’ll use the margin of error for Wald intervals, even if the
+confidence intervals we actually make are based on some other
+method.</p>
+<p>So we are looking for a value of <span class="math inline">\(n_d\)</span> such that:</p>
+<p><span class="math display">\[\frac{z^* \sqrt{\frac{\hat{p}(1 -
+\hat{p})}{n_d}}\sqrt{\frac{N-n_d}{N-1}}}{\max(\hat{p}, 1 - \hat{p})}
+\leq 0.10.\]</span> Of course, we won’t know <span class="math inline">\(\hat{p}\)</span> until we actually take our
+samnple, so we need to replace occurences of <span class="math inline">\(\hat{p}\)</span> in the above inequalities with
+reasonable approximations.</p>
+<p>Now the precision is larger (i.e., “worse”) when the denominator
+<span class="math inline">\(\max(\hat{p}, 1 - \hat{p}\)</span> is
+smallest, and this occurs when <span class="math inline">\(\hat{p} =
+0.50\)</span>. Also the precision is larger when the numerator is
+largest, and this occurs when <span class="math inline">\(\hat{p}(1-\hat{p})\)</span> is largest, and this
+also occurs when <span class="math inline">\(\hat{p} = 0.50\)</span>.
+Therefore if we replace <span class="math inline">\(\hat{p}\)</span>
+with 0.50, we get an inequality</p>
+<p><span class="math display">\[\frac{z^* \sqrt{\frac{0.5(1 -
+0.5)}{n_d}}\sqrt{\frac{N-n_d}{N-1}}}{\max(0.5, 1 - 0.5)} =
+\frac{z^*\sqrt{N-n_d}}{\sqrt{n_d(N-1)}}\leq 0.10.\]</span> which, when
+solved for <span class="math inline">\(n_d\)</span>, results in a sample
+size that is conservative in the sense that it is liable to be larger
+than needed.</p>
+<p>Solving the inequality for <span class="math inline">\(n_d\)</span>,
+we get:</p>
+<p><span class="math display">\[n_d \geq \frac{(z^*)^2N}{0.10^2(N-1)
++(z^*)^2}.\]</span></p>
+<p>This agrees with the formula suggested on page 28 of
+<em>CDM-EB50-A30-STAN</em>, when one replaces the <span class="math inline">\(p\)</span> in that formula with 0.50.</p>
+<p>For example, if we plan to make a 90%-confidence interval and the
+size of the population is <span class="math inline">\(N=500\)</span>,
+then the sample size needs to be at least</p>
+<p><span class="math display">\[\frac{1.645^2\times 500}{0.10^2\times
+499 +1.645^2} \approx 176.\]</span></p>
 <!-- Finn does this app-->
 </div>
 </div>
