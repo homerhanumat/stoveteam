@@ -95,7 +95,7 @@ From Section 12(a) of the document *CDM-EB50-A30-STAN* we can infer a definition
 
 >As a relative unit when the parameter of interest is a proportion (or a percentage) For example, ± 10 per cent in relative units means that the interval around a proportion value of 70 per cent is 63 per cent to 77 per cent. A proportion can describe either of the two possible scenarios of the success rate (p) or the failure rate (1−p), for example (i) cookstove still operational or (ii) cookstove no longer operational. The project participants or the coordinating/managing entity may use the larger of the two proportions in the sample size calculation, that is (p) or (1−p), in any of the monitoring periods during the crediting period without having to revise the monitoring plan.
 
-We see that precision shold be calculated as:
+We see that precision should be calculated as:
 
 $$\frac{\text{margin of error}}{\max(\hat{p}, 1 - \hat{p})} \times 100 = \frac{z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}}{\max(\hat{p}, 1 - \hat{p})} \times 100.$$
 
