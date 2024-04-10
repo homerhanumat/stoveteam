@@ -7,7 +7,7 @@
 
         <meta name="author" content="CSC 400, Spring 2024" />
     
-        <meta name="date" content="2024-04-09" />
+        <meta name="date" content="2024-04-10" />
     
     <title>Notes on Confidence Intervals</title>
 
@@ -1237,7 +1237,7 @@ margin-left: 0 !important;
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
                   <p class="author"><span class="glyphicon glyphicon-user"></span> CSC
 400, Spring 2024</p>
-                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2024-04-09</p>
+                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2024-04-10</p>
           </div>
    </div>
      
@@ -1561,12 +1561,12 @@ mixed-effects model this is, in fact, done.)</p>
 <div id="the-bootstrap" class="section level2">
 <h2>The Bootstrap</h2>
 <p>The <em>bootstrap</em> is a general strategy for statistical
-inference that be implemented with little or nothing in the way modeling
-assumptions concerning the process that generates one’s data, other than
-that the sampling is done in a controlled and quantifiable random
-fashion. It relies on the fact that, when the data are sampled randomly
-from the population, then its distribution is liable to resemble
-approximately the distribution of the population itself.</p>
+inference that be implemented with little or nothing in the way of
+modeling assumptions concerning the process that generates one’s data,
+other than that the sampling is done in a controlled and quantifiable
+random fashion. It relies on the fact that, when the data are sampled
+randomly from the population, then its distribution is liable to
+resemble approximately the distribution of the population itself.</p>
 <p>In our situation we can design a version of the bootstrap that
 retains the assumptions that the daily per-capita measurements in each
 household are normally distributed with a standatd deviation that does
@@ -1613,11 +1613,14 @@ intervals.</p>
 <h2>Sample Size</h2>
 <p>The document <em>CDM-EB50-A30-STAN</em> specifies that confidence
 interval for a mean have a precision of no more than 10%. In Section
-12(b) of the doicument, precision for a confidence interval for the mean
+12(b) of the document, precision for a confidence interval for the mean
 is defined as the margin of error divided by the sample mean (multiplied
 by 100 to convert to a percentage).</p>
-<p>Clearly we will want larger sample sizes in the future in order to
-attain the required precision.</p>
+<p>For the previous study, the margin of error for the confidence
+interval with the finite population correction factor was about 0.569
+and the sample mean was about 3.325, so the precision was 0.171. Clearly
+we will want larger sample sizes in the future in order to attain the
+required precision.</p>
 <p>For the desired precision, from a population of size <span class="math inline">\(N\)</span> we would require a sample size <span class="math inline">\(n_d\)</span> such that:</p>
 <p><span class="math display">\[\frac{t_{n_d-1}^*\sqrt{\frac{SS_b}{n_d(n_d-1)}}\sqrt{\frac{N-n_d}{N-1}}}{\bar{\bar{x}}}
 \leq 0.10.\]</span></p>
@@ -1630,7 +1633,7 @@ However:</p>
 substitue an estimate, namely: the value for <span class="math inline">\(SS_b/(n-1)\)</span> that we obtained in the pilot
 study with sample size <span class="math inline">\(n\)</span>;</li>
 <li>for <span class="math inline">\(t_{n_d-1}^*\)</span>, will use <span class="math inline">\(t_{n-1}^*\)</span> (which is a bit larger, tending
-to result in an underestiamte of <span class="math inline">\(n_d\)</span>);</li>
+to result in an underestimate of <span class="math inline">\(n_d\)</span>);</li>
 <li>for <span class="math inline">\(\bar{\bar{x}}\)</span> we will
 substitute the corresponding value that we got from the pilot
 study.</li>
@@ -1640,15 +1643,27 @@ study.</li>
 \leq 0.10.\]</span></p>
 <p>We solve the above inequality for <span class="math inline">\(n_d\)</span>, getting:</p>
 <p><span class="math display">\[n_d \geq
-\frac{(t_{n-1}^*)^2\frac{SS_b}{n-1}N}{0.10^2(\bar{\bar{x}})^2(N-1)+(t_{n-1}^*)^2\frac{SS_b}{n-1}}.\]</span></p>
-<p>If we choose not to employ a finite population correction factor, the
-the formula simplifies to:</p>
+\frac{(t_{n-1}^*)^2\frac{SS_b}{n-1}N}{0.10^2(\bar{\bar{x}})^2(N-1)+(t_{n-1}^*)^2\frac{SS_b}{n-1}}.\]</span>
+For example, suppose that in our future study the size of the population
+of households using their stove is <span class="math inline">\(N=500\)</span>. From the previous study we
+had:</p>
+<ul>
+<li><span class="math inline">\(n = 16\)</span>;</li>
+<li><span class="math inline">\(SS_b \approx\)</span> 26.046;</li>
+<li><span class="math inline">\(\bar{\bar{x}} \approx\)</span>
+3.325;</li>
+<li><span class="math inline">\(t^*_{n-1} \approx\)</span> 1.753.</li>
+</ul>
+<p>Substituting into our formula, we find <span class="math inline">\(n_d \geq\)</span> 44.107, so a sample size of at
+least 45 households is recommended. In practice, though, we should
+choose a sample size significantly larger than the minimum <span class="math inline">\(n_d\)</span>, as the precision of the resulting
+estmate, depending as it does on the random quantities <span class="math inline">\(SS_b\)</span> and <span class="math inline">\(\bar{\bar{x}}\)</span>, is itself subject to
+chance variation in the sample, and we want to minimize the chance of
+that precision coming out too large.</p>
+<p><strong>Note</strong>: If we choose not to employ a finite population
+correction factor, the the formula simplifies to:</p>
 <p><span class="math display">\[n_d \geq
 \frac{(t_{n-1}^*)^2\frac{SS_b}{n-1}}{0.10^2(\bar{\bar{x}})^2}.\]</span></p>
-<p>In practice we should choose a sample size significantly larger than
-<span class="math inline">\(n_d\)</span>, as the width of the resulting
-interval will be subject to chance variation in the sample itself and we
-want to minimize the chance of that width coming out too large.</p>
 <p><strong>Note</strong>: As a rough rule of thumb, the margin of error
 is inversely proportional to the square root of the number of households
 sampled. Thus in order to cut the marign of error in half (for example)
