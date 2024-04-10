@@ -87,7 +87,7 @@ where $N$ is the number of households that were provided with stoves.
 
 Wald intervals don't have the best statistical properties:  for smaller sample sizes, and for population proportions that are near 0 or near 1, the nominal level of confidence of the intervals can differ significantly from their actual levels.  In the situation of our study the sample size is not very large, so we will recommend a more sophisticated method.
 
-A Wilson interval with a finite population correction would be a fine choice, as it has been demonstrated to have good statisitcal properties at small sample sizes, provided that $p$ is not very close to 0 or 1.  (See Seung-Chun Lee, "Confidence Intervals for a Proportion in Finite-Poluation Sampling", *Communications of the Korean Statistical Society*, 2009, Vol. 16, no. 3, pp. 501-509.) The formula for the interval is the rather daunting expression:
+A Wilson interval with a finite population correction would be a fine choice, as it has been demonstrated to have good statisitcal properties at small sample sizes, provided that $p$ is not very close to 0 or 1.  (See Seung-Chun Lee, "Confidence Intervals for a Proportion in Finite-Population Sampling", *Communications of the Korean Statistical Society*, 2009, Vol. 16, no. 3, pp. 501-509.) The formula for the interval is the rather daunting expression:
 
 $$\tilde{p}^*\pm z^*\frac{\sqrt{1 - f^*}}{\tilde{n}^*}\sqrt{n\hat{p}(1-\hat{p}) + (1-f^*)(z^*)^2/4},$$
 where:
@@ -150,9 +150,9 @@ We would like to derive a formula for the sample size $n_d$ required for the res
 So we are looking for a value of $n_d$ such that:
 
 $$\frac{z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n_d}}\sqrt{\frac{N-n_d}{N-1}}}{\max(\hat{p}, 1 - \hat{p})} \leq 0.10.$$
-Of course, we won't know $\hat{p}$ until we actually take our samnple, so we need to replace occurences of $\hat{p}$ in the above inequalities with reasonable approximations.
+Of course, we won't know $\hat{p}$ until we actually take our sample, so we need to replace occurences of $\hat{p}$ in the above inequalities with reasonable approximations.
 
-Now the precision is larger (i.e., "worse") when the denominator $\max(\hat{p}, 1 - \hat{p}$ is smallest, and this occurs when $\hat{p} = 0.50$.  Also the precision is larger when the numerator is largest, and this occurs when $\hat{p}(1-\hat{p})$ is largest, and this also occurs when $\hat{p} = 0.50$.  Therefore if we replace $\hat{p}$ with 0.50, we get an inequality
+Now the precision is larger (i.e., "worse") when the denominator $\max(\hat{p}, 1 - \hat{p})$ is smallest, and this occurs when $\hat{p} = 0.50$.  Also the precision is larger when the numerator is largest, and this occurs when $\hat{p}(1-\hat{p})$ is largest, and this also occurs when $\hat{p} = 0.50$.  Therefore if we replace $\hat{p}$ with 0.50, we get an inequality
 
 $$\frac{z^* \sqrt{\frac{0.5(1 - 0.5)}{n_d}}\sqrt{\frac{N-n_d}{N-1}}}{\max(0.5, 1 - 0.5)} = \frac{z^*\sqrt{N-n_d}}{\sqrt{n_d(N-1)}}\leq 0.10.$$
 which, when solved for $n_d$, results in a sample size that is conservative in the sense that it is liable to be larger than needed.
