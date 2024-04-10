@@ -1633,7 +1633,7 @@ However:</p>
 substitue an estimate, namely: the value for <span class="math inline">\(SS_b/(n-1)\)</span> that we obtained in the pilot
 study with sample size <span class="math inline">\(n\)</span>;</li>
 <li>for <span class="math inline">\(t_{n_d-1}^*\)</span>, will use <span class="math inline">\(t_{n-1}^*\)</span> (which is a bit larger, tending
-to result in an underestimate of <span class="math inline">\(n_d\)</span>);</li>
+to result in an overestimate of <span class="math inline">\(n_d\)</span>);</li>
 <li>for <span class="math inline">\(\bar{\bar{x}}\)</span> we will
 substitute the corresponding value that we got from the pilot
 study.</li>
@@ -1655,11 +1655,61 @@ had:</p>
 <li><span class="math inline">\(t^*_{n-1} \approx\)</span> 1.753.</li>
 </ul>
 <p>Substituting into our formula, we find <span class="math inline">\(n_d \geq\)</span> 44.107, so a sample size of at
-least 45 households is recommended. In practice, though, we should
-choose a sample size significantly larger than the minimum <span class="math inline">\(n_d\)</span>, as the precision of the resulting
-estmate, depending as it does on the random quantities <span class="math inline">\(SS_b\)</span> and <span class="math inline">\(\bar{\bar{x}}\)</span>, is itself subject to
-chance variation in the sample, and we want to minimize the chance of
-that precision coming out too large.</p>
+least 45 households is recommended.</p>
+<p>Even though our computation of <span class="math inline">\(n_d\)</span> involves a bit of overestimation due
+to the use of <span class="math inline">\(t^*_{n-1}\)</span>, the
+precision of the estimate based on the new sample, depending as it does
+on the random quantities <span class="math inline">\(SS_b\)</span> and
+<span class="math inline">\(\bar{\bar{x}}\)</span>, will itself be
+subject to chance variation. We want to minimize the chance of that
+precision coming out too large. Therefore we might wonder: what are the
+chances of meeting the target precision, at various sample sizes?</p>
+<p>In order to shed some light on this question we conducted a
+simulation study. We imagined a normally distributed population of size
+<span class="math inline">\(N=500\)</span>, and performed the following
+procedure 10,000 times:</p>
+<ul>
+<li>Sample 16 items from the population.</li>
+<li>Use this sample to compute <span class="math inline">\(n_d\)</span>
+as per the formula above.</li>
+<li>Add to <span class="math inline">\(n_d\)</span> some “padding”
+amount <span class="math inline">\(s\)</span> for safety;</li>
+<li>Take a random sample of size <span class="math inline">\(n_d +
+s\)</span> from the population.</li>
+<li>Compute the precision associated with this sample for a
+90%-confidence interval.</li>
+</ul>
+<p>We performed the above procedure for the following values <span class="math inline">\(s\)</span>: 0, 10, 20 and 30. For each <span class="math inline">\(s\)</span>, we computed the proportion of times
+that the precision was less than the target value of 0.10. The results
+are shown in the table below:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">s</th>
+<th align="right">Pr(precision &lt;= 0.10</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">0.5752</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">0.7693</td>
+</tr>
+<tr class="odd">
+<td align="right">20</td>
+<td align="right">0.9162</td>
+</tr>
+<tr class="even">
+<td align="right">30</td>
+<td align="right">0.9813</td>
+</tr>
+</tbody>
+</table>
+<p>Reflecting on the above table, one might choose to increase the
+future sample size—from 45 to 65, perhaps.</p>
 <p><strong>Note</strong>: If we choose not to employ a finite population
 correction factor, the the formula simplifies to:</p>
 <p><span class="math display">\[n_d \geq
