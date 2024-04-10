@@ -34,7 +34,9 @@ library(nlme)
 knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
-  warning = FALSE
+  warning = FALSE,
+  out.width = "90%",
+  fig.aligh = "center"
 )
 
 ## utility function to get info on a single house:
@@ -72,7 +74,50 @@ Coming soon!
 
 # Confidence Intervals for a Proportion
 
-There are many methods for computing a confidence interval for a population proportion $p$.  The document *CDM-EB67-A06-GUID* appears to assume (see Equation 7 near the bottom of page 71) the use of what is known as the *Wald Interval*:
+One of the regular Stoeteam monitoring tasks is to estimate the proportion $p$ of all households having the stoves that are still using their stoves.  A natural way to proceed is to take a random sample of $n$ households, count the number $X$ of them that are still using their stoves, and use the quantity
+
+$$\hat{p} = \frac{X}{n}$$
+
+as a *point-estimate* of $p$.
+
+However, since it is a maater of chance which houses get into the sample, the estimator $\hat{p}$ is subject to sampling variability.  Therefore we require, in addition to a point-estimate of $p$, an interval of values that constitute reasonable possibilities, based on the data, for what $p$ might actually be.  Such an interval-estimate is known as a *confidence interval* for the unknown $p$.
+
+## Level of Confidence
+
+Statisticians have developed many methods for making confidence intervals for a population proportion based on a random sample from the population of interest.  No matter the method, each type of confidence interval carries with it a certain *level of confidence*.  The level of confidence associated with a method for making intervals is simply the probability, prior to taking a sample, that the interval that is eventually computed from the sample will contain $p$ between its upper and lower bounds---*covering* the parameter $p$, as statisticians like to say.
+
+It is important to note that level of confidence is a statement about probability.  Once a sample has been taken and an interval is computed there are no "chances" left:  either the interval contains $p$ or it does not.  Nevertheless, because the interval was computed using a formula that produces intervals that cover $p$ a certain percentage of the time in repeated sampling---90% of the time if the level of confidence is 90%---then we are justified in having that particular level of confidence that the interval contains $p$.  If one makes, for example, a 90%-confidence interval for $p$ that extends from 0.53 to 0.63, then one can say:  "I don't know for sure whether the proportion of all households that still use their stoves lies within this interval, but I'm 90%-confident that it does."
+
+It is important to distinguish the level of confidence of an interval-formula from its *nominal* level of confidence.  The level of confidence is the actual probability that an interval computed from this formula will contain $p$.  The nominal level of confidence is the probablity that it will contain $p$ given certain mathematical assumptions (often very precise) concerning the process that led to the data.  We always know the nominal level of confidence for any interval-formula that we plan to use.  Usually the actual level is not the same as the nominal level, though we hope that it will not differ from the nominal level by much.
+
+In the app below, the user can select:
+
+* the actual value of $p$, the proportion of interest that is associated with this population;
+* the size of random samples that will be taken from the population;
+* the nominal level of confidence that confidence intervals should have;
+* a method, i.e.: a particular type of interval-formula for making a confidence interval for the population proportion.
+
+(**Note**:  The imaginary population is assumed to be very large---infinite, if you like.)
+
+The user can then direct the app to take fifty random samples from the population, computing from each sample a confidence interval. The user can see which of these intervals cover $p$ and which do not. The process can be repeated as many times as the user likes, and the app will keep track of the percentage of times the intervals have covered $p$.  The longer the user goes on, the closer this percentage will come to the actual level of confidence of the interval.  Anytime the user likes he or she can start the proces over, selecting another method, or another sample size, or another level of confidence, or another value for $p$---or any combination of these.
+
+**APP GOES HERE**
+
+<!-- Finn does this app-->
+
+```{r proportion, echo=FALSE, eval = FALSE}
+shinyAppDir(
+  appDir = "proportion",
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+One lessson to be learned is that the higher the level of confidence, the wider (and therefore less "precise") the intervals are.  If one uses the app a great deal then he or she might eventually discover that at certain sample sizes and at certain values of $p$ some methods perform poorly in the sense that their actual and nominal lovels of confidence differ considerably.
+
+
+As we have said, there are many methods for computing a confidence interval for a population proportion $p$.  The document *CDM-EB67-A06-GUID* appears to assume (see Equation 7 near the bottom of page 71) the use of what is known as the *Wald Interval*:
 
 $$\left(\hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}, \hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\right),$$
 where:
@@ -126,11 +171,11 @@ res_w <- wilson_corrected(
 ```
 
 
-For example, if we sample $n=65$ households at random from a population of $N=500$ households that are provided with stoves and we find that $X=37$ are still using their stoves, then a 90%-confidence interval for $p$, the proportion of all 500 households that still use their stoves would extend from `r round(res_w$ci[1], 3)` to `r round(res_w$ci[2], 3)`, with the margin of error being `r round(res_w$margin, 4)`.  (By happenstance this turns out to be nearly the same as the corrected Wald interval, but we'll stick with it in spite of the extra effort.)
+For example, if we sample $n=65$ households at random from a population of $N=500$ households that are provided with stoves and we find that $X=37$ are still using their stoves, then a 90%-confidence interval for $p$, the proportion of all 500 households that still use their stoves, would extend from `r round(res_w$ci[1], 3)` to `r round(res_w$ci[2], 3)`, with the margin of error being `r round(res_w$margin, 4)`.  (By happenstance this turns out to be nearly the same as the corrected Wald interval, but we'll stick with it in spite of the extra effort.)
 
 ## Sample Size
 
-Our estimate the proportion of households in the population where the stove is still in use is required to have a minimum precision of 0.10.
+Our estimate of $p$ is required to have a minimum *precision* of 0.10.
 
 From Section 12(a) of the document *CDM-EB50-A30-STAN* we can infer a definition of precision:
 
@@ -143,7 +188,7 @@ $$\text{precision} = \frac{\text{margin of error}}{\max(\hat{p}, 1 - \hat{p})}.$
 Thus in our example where we sample $n=65$ households at random from a population of $N=500$ households that are provided with stoves and find that $X=37$ are still using their stoves, we have $\hat{p} = 37/65 \approx 0.569$ so the maximum of $\hat{p}$ and $1-\hat{p}$ is 0.569 and the precision would be:
 
 $$\frac{\text{margin of error}}{0.569} \approx \frac{0.0927}{0.569} \approx 0.163,$$
-a good bit higher than our target.  We will have to take a larger sample.
+a good bit higher than our target.  We will have to take a larger sample!
 
 We would like to derive a formula for the sample size $n_d$ required for the resulting confidence interval to have a precision not exceeding 0.10.  In order to derive the formula we must assume a fairly simple fornula for the margin of error, so we'll use the margin of error for Wald intervals, even if the confidence intervals we actually make are based on another method.
 
@@ -168,18 +213,6 @@ For example, if we plan to make a 90%-confidence interval and the size of the po
 $$\frac{1.645^2\times 500}{0.10^2\times 499 +1.645^2} \approx 176.$$
 
 
-<!-- Finn does this app-->
-
-```{r proportion, echo=FALSE}
-# shinyAppDir(
-#   appDir = "proportion",
-#   options = list(
-#     width = "100%", height = 550
-#   )
-# )
-```
-
-
 # Confidence Intervals for the Mean
 
 Coming soon!
@@ -187,13 +220,13 @@ Coming soon!
 <!-- Rhys does this app-->
 
 
-```{r mean, echo=FALSE}
-# shinyAppDir(
-#   appDir = "mean",
-#   options = list(
-#     width = "100%", height = 550
-#   )
-# )
+```{r mean, echo=FALSE, eval = FALSE}
+shinyAppDir(
+  appDir = "mean",
+  options = list(
+    width = "100%", height = 550
+  )
+)
 ```
 
 
@@ -363,6 +396,17 @@ res_lme <- intervals(mod, level = 0.90)
 ## Simulation Studies
 
 We have conducted some simulation studies to get an idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric 90%-confidence intervals constructed using all of the data actually cover the mean about 89% of the time.  It should be acceptable to use this interval formula and to keep all of the data.  (In the computations for the mixed-effects model this is, in fact, done.)
+
+<!-- Christara does this app-->
+
+```{r computation, echo=FALSE}
+# shinyAppDir(
+#   appDir = "computation",
+#   options = list(
+#     width = "100%", height = 550
+#   )
+# )
+```
 
 ## The Bootstrap
 
@@ -559,16 +603,6 @@ $$n_d \geq \frac{(t_{n-1}^*)^2\frac{SS_b}{n-1}}{0.10^2(\bar{\bar{x}})^2}.$$
 
 We might be able to use the data we have to research how to strike the best balance between the number of sampled households and the number of measurements at each household.  (For example, if a researcher could equally well vist two households for two days each in not much more time than it takes to visit one household for four days, could this provide more precise estimates?)
 
-<!-- Christara does this app-->
-
-```{r computation, echo=FALSE}
-# shinyAppDir(
-#   appDir = "computation",
-#   options = list(
-#     width = "100%", height = 550
-#   )
-# )
-```
 
 # Appendix
 
