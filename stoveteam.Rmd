@@ -77,7 +77,7 @@ There are many methods for computing a confidence interval for a population prop
 $$\left(\hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}, \hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\right),$$
 where:
 
-* $\hat{p} = x/n$ is the *sample proportion* (the number $x$ of successes in the sample divided by the sample size $n$);
+* $\hat{p} = X/n$ is the *sample proportion* (the number $X$ of successes in the sample divided by the sample size $n$);
 * $z^*$ is the percentile of the standard normal distribution appropriate to the desired level of confidence (for a 90%-confidence interval this is approximately `r round(qnorm(0.95), 3)`).
 
 **Note**:  Equation 7 actually included an attempt at the *finite population correction factor* but got the factor slightly wrong.  The interval with correction factor should be:
@@ -85,11 +85,52 @@ where:
 $$\left(\hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}, \hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}\right),$$
 where $N$ is the number of households that were provided with stoves.
 
-Wald intervals don't have the best statistical properties:  for smaller sample sizes, and for population proportions that are near 0 or near 1, the nominal level of confidence of the intervals can differ significantly from their actual levels.  In the situation of our study the sample size is not very large, so we recommend a more sophisticated method.  (An Agresti-Coul interval would be fine.)
+Wald intervals don't have the best statistical properties:  for smaller sample sizes, and for population proportions that are near 0 or near 1, the nominal level of confidence of the intervals can differ significantly from their actual levels.  In the situation of our study the sample size is not very large, so we will recommend a more sophisticated method.
+
+A Wilson interval with a finite population correction would be a fine choice, as it has been demonstrated to have good statisitcal properties at small sample sizes, provided that $p$ is not very close to 0 or 1.  (See Seung-Chun Lee, "Confidence Intervals for a Proportion in Finite-Poluation Sampling", *Communications of the Korean Statistical Society*, 2009, Vol. 16, no. 3, pp. 501-509.) The formula for the interval is the rather daunting expression:
+
+$$\tilde{p}^*\pm z^*\frac{\sqrt{1 - f^*}}{\tilde{n}^*}\sqrt{n\hat{p}(1-\hat{p}) + (1-f^*)(z^*)^2/4},$$
+where:
+
+* $n$ is the sample size;
+* $\hat{p}$ is the sample proportion (number of successes $X$ in the sample divided by $n$);
+* $z^*$ is the percentile of the standard normal distribution that corresponding to the desired level of confidence (approximately 1.645 for a 90%-confidence interval);
+* $f^* = (n-1)/(N-1)$, where $N$ is the size of the population from which the sample is drawn;
+* $\tilde{n}^*= n + (1-f^*)(z^*)^2$;
+* $\tilde{p}^* = \left(X + (1-f^*)(z^*)^2/2\right)/\tilde{n}^*$.
+
+```{r}
+wilson_corrected <- function(x, n, N, level) {
+  z <- qnorm((1 + level) / 2)
+  p_hat <- x / n
+  f <- (n - 1) / (N - 1)
+  n_t <- n + (1 - f) * z^2
+  p_t <- (x + (1 - f) * z^2 / 2) / n_t
+  margin <- z*sqrt(1-f)*sqrt(n*p_hat*(1-p_hat)+(1-f)*z^2/4)/n_t
+  interval <- c(
+    lower = p_t - margin,
+    upper = p_t + margin
+  )
+  list(
+    ci = interval,
+    margin = margin
+  )
+}
+
+res_w <- wilson_corrected(
+  x = 37,
+  n = 65,
+  N = 500,
+  level = 0.90
+)
+```
+
+
+For example, if we sample $n=65$ households at random from a population of $N=500$ households that are provided with stoves and we find that $X=37$ are still using their stoves, then a 90%-confidence interval for $p$, the proportion of all 500 households that still use their stoves would extend from `r round(res_w$ci[1], 3)` to `r round(res_w$ci[2], 3)`, with the margin of error being `r round(res_w$margin, 4)`.  (By happenstance this turns out to be nearly the same as the corrected Wald interval, but we'll stick with it in spite of the extra effort.)
 
 ## Sample Size
 
-Our estimate of $p$, the proportion of households in the population where the stove is still in use, is required to have a minimum precision of 0.10.
+Our estimate the proportion of households in the population where the stove is still in use is required to have a minimum precision of 0.10.
 
 From Section 12(a) of the document *CDM-EB50-A30-STAN* we can infer a definition of precision:
 
@@ -97,9 +138,14 @@ From Section 12(a) of the document *CDM-EB50-A30-STAN* we can infer a definition
 
 We see that precision should be calculated as:
 
-$$\text{precision} = \frac{\text{margin of error}}{\max(\hat{p}, 1 - \hat{p})} = \frac{z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}}{\max(\hat{p}, 1 - \hat{p})}.$$
+$$\text{precision} = \frac{\text{margin of error}}{\max(\hat{p}, 1 - \hat{p})}.$$
 
-We would like to derive a formula for the sample size $n_d$ required for the resulting confidence interval to have a precision not exceeding 0.10.  In order to derive the formula we must assume a fairly simple fornula for the margin of error, so we'll use the margin of error for Wald intervals, even if the confidence intervals we actually make are based on some other method.
+Thus in our example where we sample $n=65$ households at random from a population of $N=500$ households that are provided with stoves and find that $X=37$ are still using their stoves, we have $\hat{p} = 37/65 \approx 0.569$ so the maximum of $\hat{p}$ and $1-\hat{p}$ is 0.569 and the precision would be:
+
+$$\frac{\text{margin of error}}{0.569} \approx \frac{0.0927}{0.569} \approx 0.163,$$
+a good bit higher than our target.  We will have to take a larger sample.
+
+We would like to derive a formula for the sample size $n_d$ required for the resulting confidence interval to have a precision not exceeding 0.10.  In order to derive the formula we must assume a fairly simple fornula for the margin of error, so we'll use the margin of error for Wald intervals, even if the confidence intervals we actually make are based on another method.
 
 So we are looking for a value of $n_d$ such that:
 
