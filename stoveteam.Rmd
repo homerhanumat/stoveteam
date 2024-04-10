@@ -90,6 +90,8 @@ It is important to note that level of confidence is a statement about probabilit
 
 It is important to distinguish the level of confidence of an interval-formula from its *nominal* level of confidence.  The level of confidence is the actual probability that an interval computed from this formula will contain $p$.  The nominal level of confidence is the probablity that it will contain $p$ given certain mathematical assumptions (often very precise) concerning the process that led to the data.  We always know the nominal level of confidence for any interval-formula that we plan to use.  Usually the actual level is not the same as the nominal level, though we hope that it will not differ from the nominal level by much.
 
+### An Illustrative App
+
 In the app below, the user can select:
 
 * the actual value of $p$, the proportion of interest that is associated with this population;
@@ -115,6 +117,8 @@ shinyAppDir(
 ```
 
 One lessson to be learned is that the higher the level of confidence, the wider (and therefore less "precise") the intervals are.  If one uses the app a great deal then he or she might eventually discover that at certain sample sizes and at certain values of $p$ some methods perform poorly in the sense that their actual and nominal lovels of confidence differ considerably.
+
+## Recommended Method
 
 
 As we have said, there are many methods for computing a confidence interval for a population proportion $p$.  The document *CDM-EB67-A06-GUID* appears to assume (see Equation 7 near the bottom of page 71) the use of what is known as the *Wald Interval*:
@@ -288,9 +292,9 @@ to the margin of error, obtaining:
 $$\left(\overline{\overline{X}} - t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}}\sqrt{\frac{N-n}{N-1}},\, \overline{\overline{X}} + t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}}\sqrt{\frac{N-n}{N-1}}\right).$$
 The correction factor need only be incorporated when the sample size $n$ is a substantial fraction of the size of the population.
 
-Clearly, though,  there is an obstacle to using either of the above intervals, since in our study not all households were measured for the same number of days:  the number of days was sometimes 3 and sometimes 4.  Hence the random variable $T$ will not, for us, have an exact t-distribution.  We won't be able to derive confidence intervals with coverage-properties that are known exactly.
+Clearly, though,  there is an obstacle to using either of the above intervals, since in our study not all households were measured for the same number of days:  the number of days was sometimes 3 and sometimes 4.  Hence the random variable $T$ will not, for us, have an exact $t$-distribution.  The nominal level of our confidence intervals won't be exactly equal to their actual level.
 
-We can take a conservative approach, however.  Suppose that we were to simply throw away the final measurement for any day that had four measurements.  Then the number $J$ above could be set to three, and from the remaining data we could compute exact confidence intervals.
+We might try to address the issue by taking a conservative approach.  What if we we were to simply throw away the final measurement for any day that had four measurements?  Then the number $J$ above could be set to three, and from the remaining data we could compute exact confidence intervals.
 
 ```{r}
 compute_ci_1 <- function(data, level, use = NULL, N = NULL) {
@@ -352,7 +356,7 @@ When we throw out the fourth-day measurements and make a confidence interval bas
 * The margin of error for the above interval is `r round(res$margin, 3)`.
 
 
-When we keep all of the measurements, we find that:
+On the other hand, if we bite the bullet and keep all of the measurements, we find that:
 
 * The point-estimate of $\mu$ is `r round(res_all$point_estimate, 3)`.
 * The 90%-confidence interval extends from `r round(res_all$interval[1], 3)` to `r round(res_all$interval[2], 3)`.
@@ -376,7 +380,7 @@ ggplot(house_info, aes(x = mean)) +
   geom_rug()
 ```
 
-The sample has a strong right-skew, indicating that the population could be strongly right-skewed as well.
+The sample has a strong right-skew, indicating that the population could be strongly right-skewed as well.  This is another reason to believe that the nominal and actual level of confidence of our intervals will differ.
 
 In future studies it would be prudent to take a larger sample of households, perhaps 30 or so.  (We are likely to take a much larger sample anyway, in order to meet the required precision.)
 
@@ -395,7 +399,40 @@ res_lme <- intervals(mod, level = 0.90)
 
 ## Simulation Studies
 
-We have conducted some simulation studies to get an idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric 90%-confidence intervals constructed using all of the data actually cover the mean about 89% of the time.  It should be acceptable to use this interval formula and to keep all of the data.  (In the computations for the mixed-effects model this is, in fact, done.)
+We have conducted some simulation studies to get an idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric confidence-intervals constructed using all of the data and having a 90% nominal level of confidence actually covered the mean about 89% of the time.  Therefore it should be acceptable to use the suggested interval formula, keeping all of the data.  (In the computations for the mixed-effects model this is, in fact, always done.)
+
+### An Illustrative App
+
+The following app allows readers to conduct some simulations of their own.
+
+The app constructs a hypothetical infinite population that has what statisticians call a *mixed-normal* distribution, i.e.: the population is a combination of two normally distributed groups. (You can think of them as two groups of households:  Group One tending to use not so much wood per-dapita in a day, and Group Two using more.). The user chooses the mean and the standard deviation of both groups, as well as the proportion of the total population that is Group One (the rest of the population being Group Two).
+
+The per-capita usage each day in each household in the population is itself normally distributed, with a mean equal to the household mean and a standard deviation that the user can set.  (This standard deviation applies to all of the households in the population.)
+
+The user can set a nominal level of confidence for the intervals that will be made for $\mu$, the mean of household means.
+
+The user can also specify how many measurements to make at each household in the sample, by entering text into the relevant text-input field.  The entry must be in the form of ordered pairs separated by commas.  For example, the user might enter:
+
+>(4, 8), (3, 7), (5, 1)
+
+This means that we plan to sample $8+7+1 = 16$ households at random from the populations, and
+
+* 8 houses will be studied for 4 days each;
+* 7 houses will be studied for 3 days each;
+* 1 house will studied for 5 days.
+
+Thus the text-entry determines the size of the samples that will be taken.
+
+Finally, the user can specify how many random samples will be taken in the simulation.  When the user presses the provided action-button the simulation commences:  the specified number of random samples is taken, and from each random sample a confidence interval for $\mu$ is made.
+
+When the simulation is complete the main panel of the app will show two tabs:
+
+* In the first tab is a density plot of the mixed-normal population, with a statement of its mean.  (This is the $\mu$ that our confidence intervals aim to cover.)
+* In the second tab there is a plot of the distribution of the $t$-statistics associated with the simulated samples, and for comparison a plot of the $t$-distribution with degrees of freedom equal to one less than the sample size.  The latter is the distribution used to obtain critical values for our confidence intervals.  The more closely the plot of simulated $t$-statistics resembles the plot of the $t$-distribution, the closer the actual level of confidence should be to the nominal level.  Underneath is a statement of the proportion of the time the simulated intervals covered $\mu$.  This estimates the actual level of confidence.
+
+The user may start over and set new specifications for the simulation.
+
+**APP GOES HERE**
 
 <!-- Christara does this app-->
 
@@ -407,6 +444,9 @@ We have conducted some simulation studies to get an idea of the effect of the li
 #   )
 # )
 ```
+
+**Note**:  If the two groups are given the same mean and same standard deviation, then the resulting population is normally distributed, with that mean common mean and that common standard deviation.  If in addition the user specifies that all households should be studied for the same number of days---e.g., by entering something like `(4, 16)` to indicate that we want to sample 16 households and study each of them for four days---then all of the mathematical assumptions of our confidence-interval method are met, and the actual and nominal levels of confidence are the same.
+
 
 ## The Bootstrap
 
@@ -614,11 +654,15 @@ In this case we would have to consider what sort of sample we have drawn from th
 
 Now it is possible to treat a cluster sample as a simple random sample, provided that it is reasonable to believe that the cluster-units---for us: the households in the population---are similar with respect to their per-capita daily usage of wood.
 
+### An Illustrative App
+
 But are the households similar?  One way to investigate this question is to make use of the fact that if the households *were* similar, then each one of the observed per-capita daily measurments could have been observed at any of the houses in the sample---not just at the house where it was actually observed.
 
 in the app below, each time the user presses the action button the observed measurements in the actual study are scrambled randomly among the sample households.  Each household $h_i$, where $1 \leq i \leq 16$, gets the same number $J_i$ of measurements that it had in the actual study, but these $J_i$ measurements are a random sample form the 57 measurments in the study.  The app then computes the average of the measurements for each household and makes a density plot (right column in the main panel) of these 16 averages.  For comparison, a density plot of the 16 averages in the actual study is shown in the left column of the main panel.
 
 Try the app many times, comparing the right and left columns as you go.
+
+**APP GOES HERE**
 
 <!-- Eivory does this app-->
 
@@ -632,6 +676,8 @@ Try the app many times, comparing the right and left columns as you go.
 ```
 
 You will probably notice that, on the whole the averages from scrambled measurements are much less spread apart from each other than are the averages from the actual study.  This is happening because the households are *not* similar with respect to usage:  some households use more wood per-capita on average than do other houses.
+
+### Analysis of Variance
 
 Statisticians might suggest that we quantify the strength of the evidence provided by the data for dis-similarity across households.  One possible way to accomplish this is to compare two models of wood-usage:
 
