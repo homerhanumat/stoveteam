@@ -495,7 +495,7 @@ In order to shed some light on this question we conducted a simulation study.  W
 We performed the above procedure for the following values $s$:  0, 10, 20 and 30.  For each $s$, we computed the proportion of times that the precision was less than the target value of 0.10.  The results are shown in the table below:
 
 
-```{r}
+```{r precision-sim, cache = TRUE}
 set.seed(2020)
 precision_sim_2 <- function(reps, mu, sd, n, N, 
                             level, target, addons) {
@@ -538,7 +538,9 @@ res_p2 <- precision_sim_2(
   target = 0.10,
   addons = seq(0, 30, by = 10)
 )
+```
 
+```{r}
 knitr::kable(res_p2)
 ```
 
