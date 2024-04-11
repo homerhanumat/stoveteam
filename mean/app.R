@@ -1,6 +1,7 @@
 library(shiny)
 library(bslib)
 library(bsicons)
+library(shinyjs)
 
 
 ui <- fluidPage(theme = bslib::bs_theme(primary = "orange"),
@@ -84,5 +85,22 @@ ui <- fluidPage(theme = bslib::bs_theme(primary = "orange"),
                 ))
 
 server <- function(input, output, session) {
+  observeEvent(input$make_intervals, {
+    hide("pop")
+    hide("n")
+    hide("level")
+    show("start_over")
+  })
+  observeEvent(input$start_over, {
+    show("pop")
+    show("n")
+    show("level")
+    hide("start_over")
+  })
+  
+  
+  
+#  output$cov_prop_plot <- renderPlot()
+#  output$more_ints_plot <- renderPlot()
 }
 shinyApp(ui, server)
