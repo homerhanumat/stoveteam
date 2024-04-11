@@ -1,6 +1,6 @@
-########################################
+###################################################
 #  Utility Functions for Generating Pareto Values
-########################################
+###################################################
 
 rpareto <- function(n,alpha,theta) {#random values for Pareto(alpha,theta) distribution
   theta*((1-runif(n))^(-1/alpha)-1)
@@ -11,9 +11,9 @@ dpareto <- function(x,alpha,theta) {  #pdf for Pareto(alpha,theta) distribution
 }
 
 
-#############################################
+############################
 # Generate the populations
-############################################
+############################
 mu_norm <- 70
 sigma_norm <- 5
 shape_gamma <- 2
@@ -50,18 +50,18 @@ d_outlier <- function(x) {
   (1-prop_outliers) * reg + prop_outliers * out
 }
 
-#######################################
+############################
 # Get the population means
-######################################
+############################
 
 normal_mean <- mu_norm
 skew_mean <- shape_gamma*scale_gamma
 super_skew_mean <- theta_pareto/(alpha_pareto - 1)
 outlier_mean <- (1-prop_outliers)*mean_regulars+prop_outliers*mean_outliers
 
-#######################################
-# plot data
-######################################
+###################
+# plot population
+###################
 
 draw_pop <- function(pop = c("normal", "skew", "super_skew", "outlier")) {
   if (pop == "normal") {
@@ -142,3 +142,94 @@ draw_pop <- function(pop = c("normal", "skew", "super_skew", "outlier")) {
   }
   p
 }
+
+#######################################
+# Function to get m samples of size n
+#######################################
+
+get_samples <- function(m, n, pop = c("normal", "skew", "super_skew", "outlier")) {
+  samps <- vector(mode = "list", length = m)
+  for (i in 1:m) {
+    if (pop == "normal") {
+      samps[[i]] <- rnorm(n, mean = normal_mean, sd = sigma_norm)
+    }
+    if (pop == "skew") {
+      samps[[i]] <- rgamma(n, shape = shape_gamma, scale = scale_gamma)
+    }
+    if (pop == "super_skew") {
+      samps[[i]] <- rpareto(n, alpha = alpha_pareto, theta = theta_pareto)
+    }
+    if (pop == "outlier") {
+      samps[[i]] <- r_outlier(n)
+    }
+  }
+  samps
+}
+
+###########################################################
+# Function to keep track of intervals, means and coverage
+###########################################################
+
+get_intervals <- function(samps, pop = c("normal", "skew", "super_skew", "outlier"), level) {
+  if (pop == "normal") mu <- normal_mean
+  if (pop == "skew") mu <- skew_mean
+  if (pop == "super_skew") mu <- super_skew_mean
+  if (pop == "outlier") mu <- outlier_mean
+  m <- length(samps)
+  good <- logical(m)
+  xbar <- numeric(m)
+  lower <- numeric(m)
+  upper <- numeric(m)
+  number = 1:m
+  for (i in 1:m) {
+    xs <- samps[[i]]
+    n <- length(xs)
+    xbar[i] <- mean(xs)
+    crit <- qt((1 + level) / 2, df = n-1)
+    margin <- crit * sd(xs) / sqrt(n)
+    lower[i] <- xbar[i] - margin
+    upper[i] <- xbar[i] + margin
+    good[i] <- mu >= lower[i] & mu <= upper[i]
+  }
+  data.frame(
+    number = number,
+    xbar = xbar,
+    lower = lower,
+    upper = upper,
+    good = good
+  )
+}
+
+##############################
+# function to plot intervals
+##############################
+
+interval_plot <- function(data, pop = c("normal", "skew", "super_skew", "outlier")) {
+  if (pop == "normal") mu <- normal_mean
+  if (pop == "skew") mu <- skew_mean
+  if (pop == "super_skew") mu <- super_skew_mean
+  if (pop == "outlier") mu <- outlier_mean
+  plot <- ggplot(data) +
+    geom_vline(aes(xintercept = mu)) +
+    geom_segment(
+      aes(
+        x = lower,
+        xend = upper,
+        y = number,
+        yend = number,
+        color = good
+      )
+    ) +
+    geom_point(aes(x = xbar, y = number), size = 0.5) +
+    labs( x = NULL, y = NULL) +
+    theme(
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+  plot
+}
+
+
+

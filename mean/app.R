@@ -3,6 +3,8 @@ library(bslib)
 library(bsicons)
 library(shinyjs)
 
+## Load utility functions
+source("Utilities.R")
 
 ui <- fluidPage(theme = bslib::bs_theme(primary = "orange"),
                 fluidRow(
@@ -98,9 +100,13 @@ server <- function(input, output, session) {
     hide("start_over")
   })
   
+  samps_data <- reactive(get_samples(input$m, input$n, input$pop))
+  ints_data <- reactive(get_intervals(samps_data(), input$pop, input$level))
   
   
-#  output$cov_prop_plot <- renderPlot()
-#  output$more_ints_plot <- renderPlot()
+  
+  
+  output$cov_prop_plot <- renderPlot(draw_pop(input$pop))
+  output$more_ints_plot <- renderPlot(interval_plot(ints_data, input$pop))
 }
 shinyApp(ui, server)
