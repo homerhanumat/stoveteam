@@ -1474,8 +1474,94 @@ then the sample size needs to be at least</p>
 </div>
 <div id="confidence-intervals-for-the-mean" class="section level1">
 <h1>Confidence Intervals for the Mean</h1>
-<p>Coming soon!</p>
+<p>A second Stoveteam monitoring task is to estimate the mean, over all
+households in the population of households that use their stoves, of the
+mean daily per-capita usage of wood fuel. The goal now is to estimate a
+population mean with the mean of a random sample of numbers, rather than
+a population proportion from a sample of answers to a Yes/No question;
+nevertheless the need for an interval estimate persists, and the
+fundamental concepts of confidence intervals still apply.</p>
+<p>We will address the specific monitoring task in the next section. In
+this section, let’s just look at confidence intervals for the mean of a
+population. To keep things as simple as possible, we’ll assume that the
+population is quite large in comparison to the sample size; hence there
+will be, for now, no talk of finite population correction factors.</p>
+<p>Suppose that the population is normally distributed with an unknown
+mean <span class="math inline">\(\mu\)</span> and an unknown standard
+deviation <span class="math inline">\(\sigma\)</span>, and that we plan
+to take a random sample</p>
+<p><span class="math display">\[X_1, X_2, \ldots, X_n\]</span> of size
+<span class="math inline">\(n\)</span> from the population. We can
+estimate <span class="math inline">\(\mu\)</span> with the sample
+mean:</p>
+<p><span class="math display">\[\bar{X} = \frac{\sum_{i=1}^n
+X_i}{n}.\]</span></p>
+<p>We don’t know the population standard deviation, but statistical
+theory suggests that it can be estimated by the <em>sample standard
+deviation</em>:</p>
+<p><span class="math display">\[\hat{\sigma} = \sqrt{\frac{\sum_{i=1}^n
+(X_i - \bar{X})^2}{n-1}}.\]</span> It turns out that the following
+random quanitty known as the <span class="math inline">\(t\)</span>-statistic</p>
+<p><span class="math display">\[T = \frac{\bar{X} -
+\mu}{\hat{\sigma}/\sqrt{n}}\]</span></p>
+<p>has a known probability distribution, namely the <span class="math inline">\(t\)</span>-distribution with <span class="math inline">\(n-1\)</span> degrees of freedom. From this fact it
+is possible to derive a formula for a confidence interval for <span class="math inline">\(\mu\)</span> of any desired level of confidence.
+The formula is as follows:</p>
+<p><span class="math display">\[\left(\bar{X} -
+t^*_{n-1}\frac{\hat{\sigma}}{\sqrt{n}}, \,\bar{X} +
+t^*_{n-1}\frac{\hat{\sigma}}{\sqrt{n}}\right),\]</span></p>
+<p>where <span class="math inline">\(t^*_{n-1}\)</span> is the
+percentile of the <span class="math inline">\(t\)</span>-distribution
+associated with the nominal level of confidence. Assuming normality of
+the population, the nominal level of confidence is exactly the true
+level of confidence.</p>
+<p>Differences between nominal and actual levels of confidence arise
+when the above formula for confidence intervals is applied when the
+population is not normally distributed. Statistical theory guarantees
+that, as sample size <span class="math inline">\(n\)</span> increases to
+infinity, the actual level of confidence converges to the nominal level,
+but when sample size is small and the underlying population departs from
+normal in significant ways—especially if it is strongly skewed or has
+significant outliers—then the differences can be large enough to worry
+us.</p>
+<div id="an-illustrative-app-1" class="section level3">
+<h3>An Illustrative App</h3>
+<p>The following app permits the reader to see the effect of departures
+from normality on the actual level of confidence, at various sample
+sizes and various levels of confidence.</p>
+<p>The user can choose between four different populations:</p>
+<ul>
+<li>normally distributed;</li>
+<li>skewed-right (a member of the <em>exponential</em> family of
+distributions);</li>
+<li>very skewed right (a member of the <em>Pareto</em> family of
+distributions);</li>
+<li>a population with a substantial group of outliers (a member of the
+<em>mixed-normal</em> family of distributions).</li>
+</ul>
+<p>The user will be able to see a density plot of the selected
+population and a statement of its mean <span class="math inline">\(\mu\)</span>.</p>
+<p>The user may also choose the sample size and the nominal level of
+confidence of the intervals made from the samples to be taken.</p>
+<p>When the user asks to begin simulation, the app will, at the user’s
+discretion, draw either 50 or 100 random samples from the population,
+and the user will be shown a graph that shows the resulting confidence
+intervals for <span class="math inline">\(\mu\)</span> and whether or
+not each interval covered <span class="math inline">\(\mu\)</span>. The
+app will also keep a running total of the number of samples taken and
+the percentage of intervals that covered <span class="math inline">\(\mu\)</span>. This percentage is an estimate of
+the actual level of confidence—an estimate that converges to the actual
+level as the number of samples taken increases.</p>
+<p>Pressing a Start Over button, the user can make new choices for
+population, smaple size, and nominal level, and then begin a new
+simulation.</p>
+<p>For the normal population, the actual and nominal confidence levels
+are the same, at any sample size. For other populations, expect to see
+differences between nominal and actual levels–in some cases even when
+the sample size is fairly large.</p>
+<p><strong>APP GOES HERE</strong></p>
 <!-- Rhys does this app-->
+</div>
 </div>
 <div id="confidence-intervals-for-the-mean-of-household-means" class="section level1">
 <h1>Confidence Intervals for the Mean of Household Means</h1>
@@ -1644,7 +1730,7 @@ nominal level of confidence actually covered the mean about 89% of the
 time. Therefore it should be acceptable to use the suggested interval
 formula, keeping all of the data. (In the computations for the
 mixed-effects model this is, in fact, always done.)</p>
-<div id="an-illustrative-app-1" class="section level3">
+<div id="an-illustrative-app-2" class="section level3">
 <h3>An Illustrative App</h3>
 <p>The following app allows readers to conduct some simulations of their
 own.</p>
@@ -1906,7 +1992,7 @@ are looking at what is known as a “cluster” sample.</p>
 sample, provided that it is reasonable to believe that the
 cluster-units—for us: the households in the population—are similar with
 respect to their per-capita daily usage of wood.</p>
-<div id="an-illustrative-app-2" class="section level3">
+<div id="an-illustrative-app-3" class="section level3">
 <h3>An Illustrative App</h3>
 <p>But are the households similar? One way to investigate this question
 is to make use of the fact that if the households <em>were</em> similar,
