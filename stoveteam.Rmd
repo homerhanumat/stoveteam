@@ -287,9 +287,11 @@ shinyAppDir(
 
 # Confidence Intervals for the Mean of Household Means
 
-## A Parametric Approach
+We now turn to the specific task at hand:  estimating the mean of mean household per-capita daily usage of wood fuel.
 
-We imagine a large population of households.  Each household $h$ in the population has a mean per-capita daily usage of wood, which we will denote $\mu_h$.  Of course $\mu_h$ varies from one household to another.  Let $\mu$ denote the mean of all these mean per-capita daily usages.  $\mu$ is the number that we are trying to estimate and for which we desire to form a confidence interval, based upon the data we have collected.  (**Note:** See the Appendix for more on why this is the appropriate parameter.)
+## Our Recommended Approach
+
+We imagine a population of households.  Each household $h$ in the population has a mean per-capita daily usage of wood, which we will denote $\mu_h$.  Of course $\mu_h$ varies from one household to another.  Let $\mu$ denote the mean of all these mean per-capita daily usages.  $\mu$ is the number that we are trying to estimate and for which we desire to form a confidence interval, based upon the data we have collected.  (**Note:** See the Appendix for more on why this is the appropriate parameter.)
 
 We make the assumption that the population of $\mu_h$-values is normally distributed, with mean $\mu$ and some unknown standard deviation $\sigma_b$.  (The subscript $b$ calls to mind that the mean daily per-capita usage varies *between* households, i.e., from one household to another.)
 
@@ -320,12 +322,12 @@ Now let us turn to the task of making confidence intervals for $\mu$.  To this e
 
 $$SS_b = \sum_{i=1}^n \left( \overline{\overline{X}} - \bar{X}_i \right)^2.$$
 
-A bit of standard statistical theory tells us that if all households were measured for the same number $J$ of days, then the random variable:
+A bit of standard statistical theory tells us that if all households were measured for the same number $J$ of days, then the random quantity:
 
 $$T = \frac{\overline{\overline{X}} - \mu}{\sqrt{\frac{SS_b}{n(n-1)}}}$$
 would have a t-distribution, with degrees of freedom equal to $n-1$.  (Interestingly, the degrees of freedom are independent of $J$.)
 
-One then derives, in a way familiar to statisticians, confidence intervals of the form:
+We now find ourselves in the very same situation descrobed in the previous section, where one must estimate the mean of of normall-distributed population.  Accordingly we can derive, in the manner familiar to statisticians, the following formula for confidence intervals:
 
 $$\left(\overline{\overline{X}} - t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}},\, \overline{\overline{X}} + t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}}\right),$$
 
@@ -340,7 +342,7 @@ to the margin of error, obtaining:
 $$\left(\overline{\overline{X}} - t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}}\sqrt{\frac{N-n}{N-1}},\, \overline{\overline{X}} + t_{n-1}^*\sqrt{\frac{SS_b}{n(n-1)}}\sqrt{\frac{N-n}{N-1}}\right).$$
 The correction factor need only be incorporated when the sample size $n$ is a substantial fraction of the size of the population.
 
-Clearly, though,  there is an obstacle to using either of the above intervals, since in our study not all households were measured for the same number of days:  the number of days was sometimes 3 and sometimes 4.  Hence the random variable $T$ will not, for us, have an exact $t$-distribution.  The nominal level of our confidence intervals won't be exactly equal to their actual level.
+Clearly, though, there is an obstacle to using either of the above intervals, since in our study not all households were measured for the same number of days:  the number of days was sometimes 3 and sometimes 4.  Hence the random variable $T$ will not, for us, have an exact $t$-distribution.  The nominal level of our confidence intervals won't be exactly equal to their actual level.
 
 We might try to address the issue by taking a conservative approach.  What if we we were to simply throw away the final measurement for any day that had four measurements?  Then the number $J$ above could be set to three, and from the remaining data we could compute exact confidence intervals.
 
@@ -404,7 +406,7 @@ When we throw out the fourth-day measurements and make a confidence interval bas
 * The margin of error for the above interval is `r round(res$margin, 3)`.
 
 
-On the other hand, if we bite the bullet and keep all of the measurements, we find that:
+On the other hand, if we bite the bullet and keep all of the measurements---simulation studies to be covered in a subsequent section suggest that there is no great harm in doign this---we find that:
 
 * The point-estimate of $\mu$ is `r round(res_all$point_estimate, 3)`.
 * The 90%-confidence interval extends from `r round(res_all$interval[1], 3)` to `r round(res_all$interval[2], 3)`.
@@ -428,9 +430,9 @@ ggplot(house_info, aes(x = mean)) +
   geom_rug()
 ```
 
-The sample has a strong right-skew, indicating that the population could be strongly right-skewed as well.  This is another reason to believe that the nominal and actual level of confidence of our intervals will differ.
+The sample has a significant right-skew, indicating that the population could be significantly right-skewed as well.  This is another reason to believe that the nominal and actual level of confidence of our intervals will differ.
 
-In future studies it would be prudent to take a larger sample of households, perhaps 30 or so.  (We are likely to take a much larger sample anyway, in order to meet the required precision.)
+In future studies it would be prudent to take a larger sample of households, perhaps 30 or so.  (We are likely to take a much larger sample anyway, in order to meet the required precision:  see the later section on sample size.)
 
 ## The Random-Effect Approach
 
@@ -445,9 +447,11 @@ res_lme <- intervals(mod, level = 0.90)
 * The point estimate of $\mu$ is `r round(res_lme$fixed[1,"est."], 3)`
 * The 90%-confidence interval extends from `r round(res_lme$fixed[1,"lower"], 3)` to `r round(res_lme$fixed[1,"upper"], 3)`.
 
+We prefer the previous approach, as it is simple enough for the users to compute on their own without having to acquire familiarity with statistical software.
+
 ## Simulation Studies
 
-We have conducted some simulation studies to get an idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of confidence intervals.  In our simulations the parametric confidence-intervals constructed using all of the data and having a 90% nominal level of confidence actually covered the mean about 89% of the time.  Therefore it should be acceptable to use the suggested interval formula, keeping all of the data.  (In the computations for the mixed-effects model this is, in fact, always done.)
+We have conducted some simulation studies to get an idea of the effect of the likely skewness of the population and the non-uniformity of the sample size from household to household on the performance of our formula for confidence intervals.  In our simulations the parametric confidence-intervals constructed using all of the data and having a 90% nominal level of confidence actually covered the mean about 89% of the time.  Therefore it should be acceptable to use the suggested interval formula, keeping all of the data.  (In the computations for the mixed-effects model this is, in fact, always done.)
 
 ### An Illustrative App
 
@@ -558,7 +562,7 @@ We find that:
 
 * The approximate 90%-confidence interval for $\mu$ extends from `r round(interval[1],3)` to `r round(interval[2],3)`.
 
-The fact that the bootstrap with its relatively loose assumptions concerning the population structure yields about the same confidence interval as the two parametric methods covered previously should give us further assurance that it is reasonable to use the parametric intervals.
+The fact that the bootstrap with its relatively loose assumptions concerning the population structure yields about the same confidence interval as the two "parametric" methods covered previously should provide further assurance that it is reasonable to use the confidence-interval formulas that we have derived.
 
 ## Sample Size
 
