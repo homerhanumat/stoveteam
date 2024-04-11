@@ -80,7 +80,7 @@ $$\hat{p} = \frac{X}{n}$$
 
 as a *point-estimate* of $p$.
 
-However, since it is a maater of chance which houses get into the sample, the estimator $\hat{p}$ is subject to sampling variability.  Therefore we require, in addition to a point-estimate of $p$, an interval of values that constitute reasonable possibilities, based on the data, for what $p$ might actually be.  Such an interval-estimate is known as a *confidence interval* for the unknown $p$.
+However, since it is a matter of chance which houses get into the sample, the estimator $\hat{p}$ is subject to sampling variability.  Therefore we require, in addition to a point-estimate of $p$, an interval of values that constitute reasonable possibilities, based on the data, for what $p$ might actually be.  Such an interval-estimate is known as a *confidence interval* for the unknown $p$.
 
 ## Level of Confidence
 
