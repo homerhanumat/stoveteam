@@ -74,7 +74,7 @@ Coming soon!
 
 # Confidence Intervals for a Proportion
 
-One of the regular Stoeteam monitoring tasks is to estimate the proportion $p$ of all households having the stoves that are still using their stoves.  A natural way to proceed is to take a random sample of $n$ households, count the number $X$ of them that are still using their stoves, and use the quantity
+One of the regular Stoveteam monitoring tasks is to estimate the proportion $p$ of all households having the stoves that are still using their stoves.  A natural way to proceed is to take a random sample of $n$ households, count the number $X$ of them that are still using their stoves, and use the quantity
 
 $$\hat{p} = \frac{X}{n}$$
 
