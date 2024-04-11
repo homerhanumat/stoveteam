@@ -80,7 +80,7 @@ $$\hat{p} = \frac{X}{n}$$
 
 as a *point-estimate* of $p$.
 
-However, since it is a maater of chance which houses get into the sample, the estimator $\hat{p}$ is subject to sampling variability.  Therefore we require, in addition to a point-estimate of $p$, an interval of values that constitute reasonable possibilities, based on the data, for what $p$ might actually be.  Such an interval-estimate is known as a *confidence interval* for the unknown $p$.
+However, since it is a matter of chance which houses get into the sample, the estimator $\hat{p}$ is subject to sampling variability.  Therefore we require, in addition to a point-estimate of $p$, an interval of values that constitute reasonable possibilities, based on the data, for what $p$ might actually be.  Such an interval-estimate is known as a *confidence interval* for the unknown $p$.
 
 ## Level of Confidence
 
@@ -212,7 +212,7 @@ $$n_d \geq \frac{(z^*)^2N}{0.10^2(N-1) +(z^*)^2}.$$
 
 This agrees with the formula suggested on page 28 of *CDM-EB50-A30-STAN*, when one replaces the $p$ in that formula with 0.50.
 
-For example, if we plan to make a 90%-confidence interval and the size of the population is $N=500$, then the sample size needs to be at least
+Applying the above formula: if we plan to make a 90%-confidence interval and the size of the population is $N=500$, then we find that the sample size should be at least
 
 $$\frac{1.645^2\times 500}{0.10^2\times 499 +1.645^2} \approx 176.$$
 
@@ -406,7 +406,7 @@ When we throw out the fourth-day measurements and make a confidence interval bas
 * The margin of error for the above interval is `r round(res$margin, 3)`.
 
 
-On the other hand, if we bite the bullet and keep all of the measurements---simulation studies to be covered in a subsequent section suggest that there is no great harm in doign this---we find that:
+On the other hand, if we bite the bullet and keep all of the measurements---simulation studies to be covered in a subsequent section suggest that there is no great harm in doing this---we find that:
 
 * The point-estimate of $\mu$ is `r round(res_all$point_estimate, 3)`.
 * The 90%-confidence interval extends from `r round(res_all$interval[1], 3)` to `r round(res_all$interval[2], 3)`.
@@ -448,6 +448,7 @@ res_lme <- intervals(mod, level = 0.90)
 * The 90%-confidence interval extends from `r round(res_lme$fixed[1,"lower"], 3)` to `r round(res_lme$fixed[1,"upper"], 3)`.
 
 We prefer the previous approach, as it is simple enough for the users to compute on their own without having to acquire familiarity with statistical software.
+
 
 ## Simulation Studies
 
