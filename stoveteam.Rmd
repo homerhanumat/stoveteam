@@ -1,5 +1,5 @@
 ---
-title: "Notes on Confidence Intervals"
+title: "Confidence Intervals:  Notes for Stoveteam, International"
 author: "CSC 400, Spring 2024"
 date: "`r Sys.Date()`"
 output:
@@ -68,9 +68,16 @@ all_meas <-
 
 # Introduction
 
-Coming soon!
+In its [2023 Annual Report](https://www.stoveteam.org/2023-annual-report), Stoveteam International says that is commited to:
 
+>"... reducing open-fire cooking, in Central America by producing and placing fuel-efficient cookstoves in homes in Guatemala, El Salvador, Nicaragua, and Honduras."
 
+Stoveteam expects that these more fuel-efficient stoves will not only be safer for familes to use, but they can also reduce significantly the carbon-footprint of households where the stoves are in use and therefore, as the stoves are adopted more widely, reduce the carbon-footprint of the countries where Stoveteam works.  To that end, Stoveteam needs to conduct regular monitoring studies to estimate:
+
+* the proportion of households provided with stoves that continue to use them after a set period of time;
+* the mean, over all households that use the stoves, of the mean daily per-capita fuel-usage of the household.
+
+Stoveteam wants its estimates of the above two quantities to be reliable to certain target levels of precision.  The aim of this document is recommend methods of estimation and sample sizes for each type of study so that the target levels of precision are likely to be achieved.
 
 # Confidence Intervals for a Proportion
 
