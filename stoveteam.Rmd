@@ -130,7 +130,7 @@ One lessson to be learned is that the higher the level of confidence, the wider 
 
 As we have said, there are many methods for computing a confidence interval for a population proportion $p$.  The document *CDM-EB67-A06-GUID* appears to assume (see Equation 7 near the bottom of page 71) the use of what is known as the *Wald Interval*:
 
-$$\left(\hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}, \hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\right),$$
+$$\left(\hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}, \hat{p} + z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\right),$$
 where:
 
 * $\hat{p} = X/n$ is the *sample proportion* (the number $X$ of successes in the sample divided by the sample size $n$);
@@ -138,7 +138,7 @@ where:
 
 **Note**:  Equation 7 actually included an attempt at the *finite population correction factor* but got the factor slightly wrong.  The interval with correction factor should be:
 
-$$\left(\hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}, \hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}\right),$$
+$$\left(\hat{p} - z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}, \hat{p} + z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\sqrt{\frac{N-n}{N-1}}\right),$$
 where $N$ is the number of households that were provided with stoves.
 
 Wald intervals don't have the best statistical properties:  for smaller sample sizes, and for population proportions that are near 0 or near 1, the nominal level of confidence of the intervals can differ significantly from their actual levels.  In the situation of our study the sample size is not very large, so we will recommend a more sophisticated method.
