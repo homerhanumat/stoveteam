@@ -498,7 +498,7 @@ The user may start over and set new specifications for the simulation.
 # )
 ```
 
-**Note**:  If the two groups are given the same mean and same standard deviation, then the resulting population is normally distributed, with that mean common mean and that common standard deviation.  If in addition the user specifies that all households should be studied for the same number of days---e.g., by entering something like `(4, 16)` to indicate that we want to sample 16 households and study each of them for four days---then all of the mathematical assumptions of our confidence-interval method are met, and the actual and nominal levels of confidence are the same.
+**Note**:  If the two groups are given the same mean and same standard deviation, then the resulting population is normally distributed, with that common mean and that common standard deviation.  If in addition the user specifies that all households should be studied for the same number of days---e.g., by entering something like `(4, 16)` to indicate that we want to sample 16 households and study each of them for four days---then all of the mathematical assumptions of our confidence-interval method are met, and the actual and nominal levels of confidence are the same.
 
 
 ## The Bootstrap
@@ -692,9 +692,59 @@ $$n_d \geq \frac{(t_{n-1}^*)^2\frac{SS_b}{n-1}}{0.10^2(\bar{\bar{x}})^2}.$$
 
 **Note**:  As a rough rule of thumb, the margin of error is inversely proportional to the square root of the number of households sampled.  Thus in order to cut the marign of error in half (for example)  we would have to sample roughly four times as many households as we did in the pilot study.
 
-# Further Thoughts
+## Number of Measurements at Each Household
 
-We might be able to use the data we have to research how to strike the best balance between the number of sampled households and the number of measurements at each household.  (For example, if a researcher could equally well vist two households for two days each in not much more time than it takes to visit one household for four days, could this provide more precise estimates?)
+It is unclear whether the guiding documents require a minimum number of days of study at the households in the sample.  If there are no hard-and-fast requirements then we might consider spending fewer than four days at each household, provided that doing so would enable researchers to select and visit a larger number of households.
+
+Consider the formula for the standard deviation of the estimator for $\mu$:
+
+$$SD\left(\bar{\bar{X}}\right) = \frac{\sqrt{\sigma^2_b +\frac{\sigma^2_w\left(1/J_1+\ldots+1/J_n\right)}{n}}}{\sqrt{n}}.$$
+When all households are visited for the same number $J$ of days, this reduces to:
+
+$$SD\left(\bar{\bar{X}}\right) = \frac{\sqrt{\sigma^2_b +\sigma_w^2 /J}}{\sqrt{n}}.$$
+In order to improve the precision of an estimate of $\mu$ we want this standard deviation to be as small as possible.  As long as $\sigma_w$ is not a great deal larger than $\sigma_b$, increasing the number of households $n$ will do much more to decrease $SD\left(\bar{\bar{X}}\right)$ than increasing $J$ would.
+
+A random-effects model actually provides estimates of both $\sigma_b$ and $\sigma_w$.  We used these estimates to compute the estimated precision of 90%-confidence intervals that are based on various sample sizes $n$ and number of measurements $J$.  Some of the results are shown in the table below:
+
+
+```{r}
+mod <- nlme::lme(wood ~ 1, random = ~ 1 | house, data = all_meas)
+sds <- as.numeric(VarCorr(mod)[, 2])
+
+pred_prec <- function(model, J, n, level) {
+  sds <- as.numeric(VarCorr(model)[, 2])
+  sb <- sds[1]
+  sw <- sds[2]
+  xbar <- model$coefficient$fixed
+  se_xbar <- sqrt(sb^2 +sw^2/J) / sqrt(n)
+  t <- qt((1 + level) / 2, df = n - 1)
+  t * se_xbar / xbar
+}
+
+df_prec <- data.frame(
+  households = c(16, 65, 80, 80),
+  measurements = c(1000, 4, 2, 1)
+) %>% 
+  mutate(precision = pred_prec(
+    model = mod,
+    J = measurements,
+    n = households,
+    level = rep(0.90, 3)
+  ))
+```
+
+```{r}
+knitr::kable(df_prec)
+```
+
+From this table we see:
+
+* If we keep our sample size at 16 but measure each household for a thousand days, we would expect a precision scarcely smaller than the precision in the study we actually conducted with 3-4 measurements per household.  **If $J$ is already large, increasing it scarcely helps!**
+* Increasing the sample size to 65 (the level we recommended in the section on sample size) cuts the precision about in half.  This requires $4 \times 65 = 280$ measurement days.
+* Increasing the sample size to 80 and spending just two days at each household results in a slightly better precision, with only 160 measurement days required.
+* Spending just one day at each of 80 households should do just about as well as the 280 measurement-day scheme.
+
+Accordingly, if it is permitted to reduce the number of measurements at each household, then Stoveteam should consider doing so.  (Of course, in striking the optimal balance between $n$ and $J$ one must take household-overhead---the time and effort needed to identify a household, obtain permission to study it, prepare the household for study, etc.---into account.)
 
 
 # Appendix

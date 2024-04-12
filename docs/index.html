@@ -1227,9 +1227,9 @@ margin-left: 0 !important;
       Bootstrap</a></li>
       <li><a href="#sample-size-1" id="toc-sample-size-1">Sample
       Size</a></li>
+      <li><a href="#number-of-measurements-at-each-household" id="toc-number-of-measurements-at-each-household">Number of
+      Measurements at Each Household</a></li>
       </ul></li>
-      <li><a href="#further-thoughts" id="toc-further-thoughts">Further
-      Thoughts</a></li>
       <li><a href="#appendix" id="toc-appendix">Appendix</a>
       <ul>
       <li><a href="#what-parameter" id="toc-what-parameter">What
@@ -1803,9 +1803,9 @@ simulation.</p>
 <!-- Christara does this app-->
 <p><strong>Note</strong>: If the two groups are given the same mean and
 same standard deviation, then the resulting population is normally
-distributed, with that mean common mean and that common standard
-deviation. If in addition the user specifies that all households should
-be studied for the same number of days—e.g., by entering something like
+distributed, with that common mean and that common standard deviation.
+If in addition the user specifies that all households should be studied
+for the same number of days—e.g., by entering something like
 <code>(4, 16)</code> to indicate that we want to sample 16 households
 and study each of them for four days—then all of the mathematical
 assumptions of our confidence-interval method are met, and the actual
@@ -1974,15 +1974,86 @@ sampled. Thus in order to cut the marign of error in half (for example)
 we would have to sample roughly four times as many households as we did
 in the pilot study.</p>
 </div>
+<div id="number-of-measurements-at-each-household" class="section level2">
+<h2>Number of Measurements at Each Household</h2>
+<p>It is unclear whether the guiding documents require a minimum number
+of days of study at the households in the sample. If there are no
+hard-and-fast requirements then we might consider spending fewer than
+four days at each household, provided that doing so would enable
+researchers to select and visit a larger number of households.</p>
+<p>Consider the formula for the standard deviation of the estimator for
+<span class="math inline">\(\mu\)</span>:</p>
+<p><span class="math display">\[SD\left(\bar{\bar{X}}\right) =
+\frac{\sqrt{\sigma^2_b
++\frac{\sigma^2_w\left(1/J_1+\ldots+1/J_n\right)}{n}}}{\sqrt{n}}.\]</span>
+When all households are visited for the same number <span class="math inline">\(J\)</span> of days, this reduces to:</p>
+<p><span class="math display">\[SD\left(\bar{\bar{X}}\right) =
+\frac{\sqrt{\sigma^2_b +\sigma_w^2 /J}}{\sqrt{n}}.\]</span> In order to
+improve the precision of an estimate of <span class="math inline">\(\mu\)</span> we want this standard deviation to be
+as small as possible. As long as <span class="math inline">\(\sigma_w\)</span> is not a great deal larger than
+<span class="math inline">\(\sigma_b\)</span>, increasing the number of
+households <span class="math inline">\(n\)</span> will do much more to
+decrease <span class="math inline">\(SD\left(\bar{\bar{X}}\right)\)</span> than
+increasing <span class="math inline">\(J\)</span> would.</p>
+<p>A random-effects model actually provides estimates of both <span class="math inline">\(\sigma_b\)</span> and <span class="math inline">\(\sigma_w\)</span>. We used these estimates to
+compute the estimated precision of 90%-confidence intervals that are
+based on various sample sizes <span class="math inline">\(n\)</span> and
+number of measurements <span class="math inline">\(J\)</span>. Some of
+the results are shown in the table below:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">households</th>
+<th align="right">measurements</th>
+<th align="right">precision</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">16</td>
+<td align="right">1000</td>
+<td align="right">0.1665165</td>
+</tr>
+<tr class="even">
+<td align="right">65</td>
+<td align="right">4</td>
+<td align="right">0.0814477</td>
+</tr>
+<tr class="odd">
+<td align="right">80</td>
+<td align="right">2</td>
+<td align="right">0.0756486</td>
+</tr>
+<tr class="even">
+<td align="right">80</td>
+<td align="right">1</td>
+<td align="right">0.0803005</td>
+</tr>
+</tbody>
+</table>
+<p>From this table we see:</p>
+<ul>
+<li>If we keep our sample size at 16 but measure each household for a
+thousand days, we would expect a precision scarcely smaller than the
+precision in the study we actually conducted with 3-4 measurements per
+household. <strong>If <span class="math inline">\(J\)</span> is already
+large, increasing it scarcely helps!</strong></li>
+<li>Increasing the sample size to 65 (the level we recommended in the
+section on sample size) cuts the precision about in half. This requires
+<span class="math inline">\(4 \times 65 = 280\)</span> measurement
+days.</li>
+<li>Increasing the sample size to 80 and spending just two days at each
+household results in a slightly better precision, with only 160
+measurement days required.</li>
+<li>Spending just one day at each of 80 households should do just about
+as well as the 280 measurement-day scheme.</li>
+</ul>
+<p>Accordingly, if it is permitted to reduce the number of measurements
+at each household, then Stoveteam should consider doing so. (Of course,
+in striking the optimal balance between <span class="math inline">\(n\)</span> and <span class="math inline">\(J\)</span> one must take household-overhead—the
+time and effort needed to identify a household, obtain permission to
+study it, prepare the household for study, etc.—into account.)</p>
 </div>
-<div id="further-thoughts" class="section level1">
-<h1>Further Thoughts</h1>
-<p>We might be able to use the data we have to research how to strike
-the best balance between the number of sampled households and the number
-of measurements at each household. (For example, if a researcher could
-equally well vist two households for two days each in not much more time
-than it takes to visit one household for four days, could this provide
-more precise estimates?)</p>
 </div>
 <div id="appendix" class="section level1">
 <h1>Appendix</h1>
