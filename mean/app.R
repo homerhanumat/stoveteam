@@ -6,7 +6,8 @@ library(shinyjs)
 ## Load utility functions
 source("Utilities.R")
 
-ui <- fluidPage(theme = bslib::bs_theme(primary = "orange"),
+ui <- fluidPage(useShinyjs(),
+                theme = bslib::bs_theme(primary = "orange"),
                 fluidRow(
                   column(
                     width = 3,
@@ -27,7 +28,7 @@ ui <- fluidPage(theme = bslib::bs_theme(primary = "orange"),
                     ),
                     radioButtons("m", "Intervals to Draw", c(50, 100)),
                     actionButton("make_intervals", "Make Intervals"),
-                    actionButton("start_over", "Start Over")
+                    hidden(actionButton("start_over", "Start Over"))
                   ),
                   column(width = 9, tabsetPanel(
                     tabPanel("Coverage Properties",
@@ -106,7 +107,7 @@ server <- function(input, output, session) {
   
   
   
-  output$cov_prop_plot <- renderPlot(draw_pop(input$pop))
-  output$more_ints_plot <- renderPlot(interval_plot(ints_data, input$pop))
+  output$cov_prop_plot <- renderPlot({draw_pop(input$pop)})
+  output$more_ints_plot <- renderPlot({interval_plot(ints_data(), input$pop)})
 }
 shinyApp(ui, server)
