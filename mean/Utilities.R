@@ -166,6 +166,40 @@ get_samples <- function(m, n, pop = c("normal", "skew", "super_skew", "outlier")
   samps
 }
 
+##########################################
+# function to get intervals from samples
+##########################################
+
+get_intervals <- function(samps, pop = c("normal", "skew", "super_skew", "outlier"), level) {
+  if (pop == "normal") mu <- normal_mean
+  if (pop == "skew") mu <- skew_mean
+  if (pop == "super_skew") mu <- super_skew_mean
+  if (pop == "outlier") mu <- outlier_mean
+  m <- length(samps)
+  good <- logical(m)
+  xbar <- numeric(m)
+  lower <- numeric(m)
+  upper <- numeric(m)
+  number = 1:m
+  for (i in 1:m) {
+    xs <- samps[[i]]
+    n <- length(xs)
+    xbar[i] <- mean(xs)
+    crit <- qt((1 + level) / 2, df = n-1)
+    margin <- crit * sd(xs) / sqrt(n)
+    lower[i] <- xbar[i] - margin
+    upper[i] <- xbar[i] + margin
+    good[i] <- mu >= lower[i] & mu <= upper[i]
+  }
+  data.frame(
+    number = number,
+    xbar = xbar,
+    lower = lower,
+    upper = upper,
+    good = good
+  )
+}
+
 
 ##############################
 # function to plot intervals
