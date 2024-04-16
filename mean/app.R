@@ -1,3 +1,4 @@
+library(tidyverse)
 library(shiny)
 library(bslib)
 library(bsicons)
@@ -33,11 +34,11 @@ ui <- fluidPage(useShinyjs(),
                   column(width = 9, tabsetPanel(
                     tabPanel("Coverage Properties",
                              fluidPage(
-                               fluidRow(renderPlot("cov_prop_plot")),
+                               fluidRow(plotOutput("cov_prop_plot")),
                                fluidRow(
                                  value_box(
                                    "Population Mean",
-                                   "[insert output here]",
+                                   textOutput("popMean"),
                                    showcase = bsicons::bs_icon("emoji-heart-eyes"),
                                    theme = "bg-gradient-green-teal",
                                    height = "100%"
@@ -47,13 +48,13 @@ ui <- fluidPage(useShinyjs(),
                              )),
                     tabPanel("More Intervals at a Time",
                              fluidPage(
-                               fluidRow(renderPlot("more_ints_plot")),
+                               fluidRow(plotOutput("more_ints_plot")),
                                fluidRow(
                                  column(
                                    width = 4,
                                    value_box(
                                      "Intervals So Far",
-                                     "[insert output here]",
+                                     textOutput("simCount"),
                                      showcase = bsicons::bs_icon("emoji-heart-eyes"),
                                      theme = "bg-gradient-green-teal",
                                      height = "100%"
@@ -64,7 +65,7 @@ ui <- fluidPage(useShinyjs(),
                                    width = 4,
                                    value_box(
                                      "Number Containing Proportion",
-                                     "[insert output here]",
+                                     textOutput("GI"),
                                      showcase = bsicons::bs_icon("emoji-heart-eyes"),
                                      theme = "bg-gradient-green-teal",
                                      height = "100%"
@@ -75,7 +76,7 @@ ui <- fluidPage(useShinyjs(),
                                    width = 4,
                                    value_box(
                                      "Percentage Containing Proportion",
-                                     "[insert output here]",
+                                     textOutput("percGI"),
                                      showcase = bsicons::bs_icon("emoji-frown"),
                                      theme = "bg-gradient-red-orange",
                                      height = "100%"
@@ -88,6 +89,53 @@ ui <- fluidPage(useShinyjs(),
                 ))
 
 server <- function(input, output, session) {
+  
+  ###########################################################
+  # Function to keep track of intervals, means and coverage
+  ###########################################################
+  
+  rv <- reactiveValues(
+    number = NULL,
+    xbar = NULL,
+    lower = NULL,
+    upper = NULL,
+    good = NULL
+  )
+  
+  get_intervals <- function(samps, pop = c("normal", "skew", "super_skew", "outlier"), level) {
+    if (pop == "normal") mu <- normal_mean
+    if (pop == "skew") mu <- skew_mean
+    if (pop == "super_skew") mu <- super_skew_mean
+    if (pop == "outlier") mu <- outlier_mean
+    m <- length(samps)
+    good <- logical(m)
+    xbar <- numeric(m)
+    lower <- numeric(m)
+    upper <- numeric(m)
+    number = 1:m
+    for (i in 1:m) {
+      xs <- samps[[i]]
+      n <- length(xs)
+      xbar[i] <- mean(xs)
+      crit <- qt((1 + level) / 2, df = n-1)
+      margin <- crit * sd(xs) / sqrt(n)
+      lower[i] <- xbar[i] - margin
+      upper[i] <- xbar[i] + margin
+      good[i] <- mu >= lower[i] & mu <= upper[i]
+    }
+    data.frame(
+      number = number,
+      xbar = xbar,
+      lower = lower,
+      upper = upper,
+      good = good
+    )
+  }
+  
+  ######################################
+  # Code to Control Element Visibility
+  ######################################
+  
   observeEvent(input$make_intervals, {
     hide("pop")
     hide("n")
@@ -101,13 +149,27 @@ server <- function(input, output, session) {
     hide("start_over")
   })
   
-  samps_data <- reactive(get_samples(input$m, input$n, input$pop))
-  ints_data <- reactive(get_intervals(samps_data(), input$pop, input$level))
+  some_samps <- reactive(get_samples(input$m, input$n, input$pop))
   
+  ints_data <-
+    reactive(get_intervals(
+      some_samps(),
+      input$pop,
+      input$level
+    ))
   
+  output$cov_prop_plot <- renderPlot({
+    draw_pop(input$pop)
+  })
   
+  output$simCount <- renderText(sum(ints_data()$number))
+  output$GI <- renderText(ints_data()$good)
+  output$percGI <- renderText(ints_data()$good/sum(ints_data()$number))
+  output$popMean <- renderText(tail(ints_data()$number, n=1))
   
-  output$cov_prop_plot <- renderPlot({draw_pop(input$pop)})
-  output$more_ints_plot <- renderPlot({interval_plot(ints_data(), input$pop)})
+  output$more_ints_plot <-
+    renderPlot({
+      interval_plot(ints_data(), input$pop)
+    })
 }
 shinyApp(ui, server)
