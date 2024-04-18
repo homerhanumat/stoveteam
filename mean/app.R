@@ -29,7 +29,7 @@ ui <- fluidPage(useShinyjs(),
                       step = 1,
                       post = "%"
                     ),
-                    radioButtons("m", "Intervals to Draw", c(50, 100)),
+                    numericInput("m", "Intervals to Draw", 50, 1, 500, 1),
                     actionButton("make_intervals", "Make Intervals"),
                     hidden(actionButton("start_over", "Start Over"))
                   ),
