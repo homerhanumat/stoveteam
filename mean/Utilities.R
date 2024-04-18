@@ -236,5 +236,27 @@ interval_plot <- function(data, pop = c("normal", "skew", "super_skew", "outlier
   plot
 }
 
+################################
+# Function to plot percentages
+################################
 
+perc_plotr <- function(pop, int_count){
+
+if (pop == "normal") mu <- normal_mean
+if (pop == "skew") mu <- skew_mean
+if (pop == "super_skew") mu <- super_skew_mean
+if (pop == "outlier") mu <- outlier_mean
+
+df <- data.frame(
+  percents = percs,
+  intervals_drawn = int_count
+)
+
+df %>% 
+  ggplot(aes(x="intervals_drawn", y="percents"))+
+  geompoint()+
+  geomline()+
+  geom_hline(yintercept = mu)
+
+}
 

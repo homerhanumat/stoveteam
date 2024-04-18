@@ -30,14 +30,12 @@ ui <- fluidPage(useShinyjs(),
                       step = 1,
                       post = "%"
                     ),
-                    ## HSW:  the widget below should be radio buttons, with only
-                    ## two choice:  50 and 100:
-                    numericInput("m", "Intervals to Draw", 50, 1, 500, 1),
+                    radioButtons("m", "Intervals to Draw", c(50,100)),
                     actionButton("make_intervals", "Make Intervals"),
                     hidden(actionButton("start_over", "Start Over"))
                   ),
                   column(width = 9, tabsetPanel(id="inTabset",
-                    tabPanel("Coverage Properties",
+                    tabPanel("Population Graph",
                              ## HSW:  the above is not a good title.
                              ## Why not:  "Population Graph"?
                              ## make sure to revise your 
@@ -55,7 +53,7 @@ ui <- fluidPage(useShinyjs(),
                                  )
                                )
                              )),
-                    tabPanel("More Intervals at a Time",
+                    tabPanel("Confidence Intervals",
                              fluidPage(
                                fluidRow(plotOutput("more_ints_plot")),
                                fluidRow(
@@ -107,7 +105,8 @@ server <- function(input, output, session) {
     ## HSW:  let's start off with zeros:
     number = 0,
     good = 0,
-    intervals = NULL
+    intervals = NULL,
+    percs = NULL
   )
   
   ######################################
@@ -130,14 +129,10 @@ server <- function(input, output, session) {
     rv$number <- rv$number + input$m
     rv$good <- rv$good + sum(ints_data$good)
     rv$intervals <- ints_data
-    
-<<<<<<< HEAD
+ 
+
     updateTabsetPanel(inputId = "inTabset",
-                      selected = "More Intervals at a Time")
-=======
-    ## HSW:  add code to switch the tab to the one
-    ## that plots th eintervals
->>>>>>> cc5bf88c1e8694247564383a24259c06c2c21add
+                      selected = "Confidence Intervals")
     
   })
   
@@ -149,8 +144,9 @@ server <- function(input, output, session) {
     rv$number <- 0
     rv$good <- 0
     rv$intervals<- NULL
+    rv$percs <- NULL
     updateTabsetPanel(inputId = "inTabset",
-                      selected = "Coverage Properties")
+                      selected = "Population Graph")
   })
   
   output$cov_prop_plot <- renderPlot({
@@ -169,6 +165,11 @@ server <- function(input, output, session) {
   ## use a switch statment (see R help on "switch") to set the mean to whatever
   ## it should be
   output$popMean <- renderText(mu_norm)
+  
+  # output$percs_plot <- 
+  #   renderPlot({
+  #     perc_plotr()
+  #   })
   
   output$more_ints_plot <-
     renderPlot({
