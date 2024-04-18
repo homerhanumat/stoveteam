@@ -1,6 +1,7 @@
 library(shiny)
 library(tidyverse)
 library(DescTools)
+library(shinyjs)
 
 interval_df <- function(N, n, level, prob, method) {
   xs <- rbinom(N, size = n, prob = prob)
@@ -51,30 +52,63 @@ make_interval <- function(x, n, level, method, report) {
 }
 
 ui <- pageWithSidebar(
+  
   headerPanel = headerPanel(
     "Proportion App"
   ),
   sidebarPanel = sidebarPanel(
+    useShinyjs(),
+    div(id= "inputs",
     sliderInput("proportion", "Proportion", min=0, max=1, value=0.5),
     numericInput("sample_size", "Sample Size", value=100),
     sliderInput("level", "Level", min=0, max=1, value=0.9),
     selectInput("interval_type", "Interval Type", choices=c("wilson", "wald", "waldcc", "agresti-coull", "jeffreys",
                                                             "modified wilson", "wilsoncc","modified jeffreys",
                                                             "clopper-pearson", "arcsine", "logit", "witting", "pratt", 
-                                                            "midp", "lik", "blaker")),
+                                                            "midp", "lik", "blaker"))
+    ),
     actionButton("make_intervals", "Make Intervals"),
-    actionButton("start_over", "Start Over")
+    hidden(actionButton("start_over", "Start Over"))
   ),
   mainPanel = mainPanel(
     column( width=12,
-      plotOutput("plot"),
-      textOutput("text")
+      hidden(plotOutput("plot")),
+      hidden(textOutput("text"))
     )
   )
 )
 
 server <- function(input, output, session) {
+    rv <- reactiveValues(
+      total_intervals = 0,
+      good_intervals = 0,
+      last_intervals = NULL
+    )
     
+    observeEvent(input$make_intervals, {
+      intervals <- interval_df(N=50, n=input$sample_size, level=input$level, prob=input$proportion, method=input$interval_type)
+      rv$total_intervals <-  rv$total_intervals + 50
+      rv$good_intervals <- rv$good_intervals + sum(intervals$covers)
+      rv$last_intervals <- intervals
+      
+      show("start_over")
+      show("plot")
+      show("text")
+      hide("inputs")
+    })
+    observeEvent(input$start_over, {
+      rv$total_intervals <- 0
+      rv$good_intervals <- 0
+      rv$last_intervals <- NULL
+      
+      show("inputs")
+      hide("plot")
+      hide("text")
+    })
+    
+    output$text <- renderText(
+      rv$total_intervals
+    )
 }
   
  
