@@ -7,6 +7,9 @@ library(shinyjs)
 ## Load utility functions
 source("Utilities.R")
 
+## HSW:  I suggest leaving out the emojis, and 
+## changing the color to something less "loud" (please, not orange!)
+
 ui <- fluidPage(useShinyjs(),
                 theme = bslib::bs_theme(primary = "orange"),
                 fluidRow(
@@ -17,24 +20,28 @@ ui <- fluidPage(useShinyjs(),
                       "Population Type",
                       c("normal", "skew", "super_skew", "outlier")
                     ),
-                    ## HSW: need realistic sample size:
                     numericInput("n", "Sample Size", min = 2, value = 10),
                     sliderInput(
                       "level",
                       "Confidence Level",
-                      ## HSW:  make realistic min and max:
                       min = 10,
                       max = 99,
                       value = 50,
                       step = 1,
                       post = "%"
                     ),
+                    ## HSW:  the widget below should be radio buttons, with only
+                    ## two choice:  50 and 100:
                     numericInput("m", "Intervals to Draw", 50, 1, 500, 1),
                     actionButton("make_intervals", "Make Intervals"),
                     hidden(actionButton("start_over", "Start Over"))
                   ),
                   column(width = 9, tabsetPanel(id="inTabset",
                     tabPanel("Coverage Properties",
+                             ## HSW:  the above is not a good title.
+                             ## Why not:  "Population Graph"?
+                             ## make sure to revise your 
+                             ## updateTabsetPanel call accordingly
                              fluidPage(
                                fluidRow(plotOutput("cov_prop_plot")),
                                fluidRow(
@@ -97,13 +104,9 @@ server <- function(input, output, session) {
   ###########################################################
   
   rv <- reactiveValues(
-    number = NULL,
-    ## HSW:  you don't need these:
-    # xbar = NULL,
-    # lower = NULL,
-    # upper = NULL,
-    good = NULL,
-    ## HSW:  but you could store the latest intervals here:
+    ## HSW:  let's start off with zeros:
+    number = 0,
+    good = 0,
     intervals = NULL
   )
   
@@ -116,35 +119,25 @@ server <- function(input, output, session) {
     hide("n")
     hide("level")
     show("start_over")
-    ## HSW:  you need to find your samples and interval right now,
-    ## so you can update the rv object:
     some_samps <- get_samples(input$m, input$n, input$pop)
-    print(some_samps)
     ints_data <-
       get_intervals(
         some_samps,
         input$pop,
-        ## HSW;  you bring in confidence level as a percentage, but for
-        ## our computations it needs to be  number between 0 and 1, so:
         input$level / 100
       )
     
-    if (is.null(rv$number)) {
-      rv$number <- input$m
-    } else {
-      rv$number <- rv$number + input$m
-    }
-    
-    if (is.null(rv$good)) {
-      rv$good <- sum(ints_data$good)
-    } else {
-      rv$number <- rv$number + sum(ints_data$good)
-    }
-    
+    rv$number <- rv$number + input$m
+    rv$good <- rv$good + sum(ints_data$good)
     rv$intervals <- ints_data
     
+<<<<<<< HEAD
     updateTabsetPanel(inputId = "inTabset",
                       selected = "More Intervals at a Time")
+=======
+    ## HSW:  add code to switch the tab to the one
+    ## that plots th eintervals
+>>>>>>> cc5bf88c1e8694247564383a24259c06c2c21add
     
   })
   
@@ -153,36 +146,28 @@ server <- function(input, output, session) {
     show("n")
     show("level")
     hide("start_over")
-    ## HSW:  you need to set the rv object back to
-    ## its original values:
-    rv$number <- NULL
-    rv$good <- NULL
+    rv$number <- 0
+    rv$good <- 0
     rv$intervals<- NULL
     updateTabsetPanel(inputId = "inTabset",
                       selected = "Coverage Properties")
   })
   
-  #some_samps <- reactive(get_samples(input$m, input$n, input$pop))
-  
-  # ints_data <-
-  #   reactive(get_intervals(
-  #     some_samps(),
-  #     input$pop,
-  #     input$level
-  #   ))
-  
   output$cov_prop_plot <- renderPlot({
     draw_pop(input$pop)
   })
   
-  ## HSW:  these needed help:
   output$simCount <- renderText(rv$number)
-  output$GI <- renderText(rv$good)
+  output$GI <- renderText(sum(rv$good))
   ## RCT: I added the as.numeric() because it said that these variables weren't numbers:
-  output$percGI <- renderText(as.numeric(rv$good) / as.numeric(rv$number))
+  ## HSW:   That wasn't the issue:  we need sum of rv$good:
+  output$percGI <- renderText(round(sum(rv$good) / rv$number, 5) * 100)
   
   ## HSW:  see if you can fix this one:
   ## I have a mean now but because it isn't reactive I believe it is the wrong one:
+  ## HSW: make this reactive on input$pop
+  ## use a switch statment (see R help on "switch") to set the mean to whatever
+  ## it should be
   output$popMean <- renderText(mu_norm)
   
   output$more_ints_plot <-
