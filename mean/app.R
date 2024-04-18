@@ -33,7 +33,7 @@ ui <- fluidPage(useShinyjs(),
                     actionButton("make_intervals", "Make Intervals"),
                     hidden(actionButton("start_over", "Start Over"))
                   ),
-                  column(width = 9, tabsetPanel(
+                  column(width = 9, tabsetPanel(id="inTabset",
                     tabPanel("Coverage Properties",
                              fluidPage(
                                fluidRow(plotOutput("cov_prop_plot")),
@@ -155,6 +155,8 @@ server <- function(input, output, session) {
     rv$number <- NULL
     rv$good <- NULL
     rv$intervals<- NULL
+    updateTabsetPanel(inputId = "inTabset",
+                      selected = "Coverage Properties")
   })
   
   #some_samps <- reactive(get_samples(input$m, input$n, input$pop))
@@ -173,10 +175,12 @@ server <- function(input, output, session) {
   ## HSW:  these needed help:
   output$simCount <- renderText(rv$number)
   output$GI <- renderText(rv$good)
-  output$percGI <- renderText(rv$good / rv$number)
+  ## RCT: I added the as.numeric() because it said that these variables weren't numbers:
+  output$percGI <- renderText(as.numeric(rv$good) / as.numeric(rv$number))
   
   ## HSW:  see if you can fix this one:
-  ## output$popMean <- renderText(tail(ints_data()$number, n=1))
+  ## I have a mean now but because it isn't reactive I believe it is the wrong one:
+  output$popMean <- renderText(mu_norm)
   
   output$more_ints_plot <-
     renderPlot({
