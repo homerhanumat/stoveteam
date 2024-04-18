@@ -143,6 +143,9 @@ server <- function(input, output, session) {
     
     rv$intervals <- ints_data
     
+    updateTabsetPanel(inputId = "inTabset",
+                      selected = "More Intervals at a Time")
+    
   })
   
   observeEvent(input$start_over, {
