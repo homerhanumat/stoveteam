@@ -129,10 +129,17 @@ server <- function(input, output, session) {
     rv$number <- rv$number + input$m
     rv$good <- rv$good + sum(ints_data$good)
     rv$intervals <- ints_data
+<<<<<<< HEAD
  
 
     updateTabsetPanel(inputId = "inTabset",
                       selected = "Confidence Intervals")
+=======
+    
+
+    updateTabsetPanel(inputId = "inTabset",
+                      selected = "More Intervals at a Time")
+>>>>>>> a05456eae6df945da34263df9deda8313d3685e6
     
   })
   
