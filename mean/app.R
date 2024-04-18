@@ -131,13 +131,9 @@ server <- function(input, output, session) {
     rv$good <- rv$good + sum(ints_data$good)
     rv$intervals <- ints_data
     
-<<<<<<< HEAD
+
     updateTabsetPanel(inputId = "inTabset",
                       selected = "More Intervals at a Time")
-=======
-    ## HSW:  add code to switch the tab to the one
-    ## that plots th eintervals
->>>>>>> cc5bf88c1e8694247564383a24259c06c2c21add
     
   })
   
