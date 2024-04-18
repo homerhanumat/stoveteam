@@ -10,6 +10,7 @@ ui <- fluidPage(
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
+          useShinyjs(),
           actionButton(inputId = "get", label = "Gimme 10 Values!"),
           hidden(
             actionButton(inputId = "revert", label = "Start Over")
