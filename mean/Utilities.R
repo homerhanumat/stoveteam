@@ -191,19 +191,23 @@ get_intervals <- function(samps, pop = c("normal", "skew", "super_skew", "outlie
     upper[i] <- xbar[i] + margin
     good[i] <- mu >= lower[i] & mu <= upper[i]
   }
-  data.frame(
+  df <- data.frame(
     number = number,
     xbar = xbar,
     lower = lower,
     upper = upper,
     good = good
   )
+  df
 }
 
 
 ##############################
 # function to plot intervals
 ##############################
+
+## HSW:  revise this as needed so that it gives a pretty graph
+## for both 50 and 100 intervals:
 
 interval_plot <- function(data, pop = c("normal", "skew", "super_skew", "outlier")) {
   if (pop == "normal") mu <- normal_mean
