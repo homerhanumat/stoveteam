@@ -1,3 +1,7 @@
+## HSW:  I fixed the error in your code and made a few small changes,
+## see specific comments below and in the Utilities.R file.
+## The app is looking good, ready to go!
+
 library(tidyverse)
 library(shiny)
 library(bslib)
@@ -7,21 +11,8 @@ library(shinyjs)
 ## Load utility functions
 source("Utilities.R")
 
-## HSW:  I suggest leaving out the emojis, and 
-## changing the color to something less "loud" (please, not orange!)
-## Also, I looked into the showcasing, and there appears to be no way to
-## place the smiley-face icons so that they don't squeeze the text.
-## I'm afraid we will have to let them go!
-
-## RCT: No worries, I was already thinking of the emojis as a temporary placeholder.
-## In the tile for the percentage of intervals that were good, I was thinking of making
-## inputting a graph that would update to show how the percentage gets closer
-## to the percentage error as we consider more intervals. Would this be useful?
-
-
 ui <- fluidPage(useShinyjs(),
-                theme = bslib::bs_theme(primary = "forestgreen"), ## RCT: What do you think of forest green?
-                                                                  ## I'm open to any suggestions.
+                theme = bslib::bs_theme(primary = "forestgreen"),
                 fluidRow(
                   column(
                     width = 3,
@@ -36,67 +27,51 @@ ui <- fluidPage(useShinyjs(),
                       "Confidence Level",
                       min = 10,
                       max = 99,
-                      value = 50,
+                      ## HSW:  let's have 90% confidence be the default:
+                      value = 90,
                       step = 1,
                       post = "%"
                     ),
-                    radioButtons("m", "Intervals to Draw", c(50,100)),
+                    ## HSW:  Let's render number of samples dynamically:
+                    uiOutput("m"),
                     actionButton("make_intervals", "Make Intervals"),
                     hidden(actionButton("start_over", "Start Over"))
                   ),
                   column(width = 9, tabsetPanel(id="inTabset",
-                    tabPanel("Population Graph",
-                             fluidPage(
-                               fluidRow(plotOutput("cov_prop_plot")),
-                               fluidRow(
-                                 value_box(
-                                   "Population Mean",
-                                   textOutput("popMean"),
-                                   theme = "bg-gradient-green-teal",
-                                   height = "100%"
-                                 )
-                               )
-                             )),
-                    tabPanel("Confidence Intervals",
-                             fluidPage(
-                               fluidRow(plotOutput("more_ints_plot")),
-                               fluidRow(
-                                 column(
-                                   width = 4,
-                                   value_box(
-                                     "Intervals So Far",
-                                     textOutput("simCount"),
-                                     theme = "bg-gradient-green-teal",
-                                     height = "100%"
-                                   )
-                                 ),
-                                 column(
-                                   width = 4,
-                                   value_box(
-                                     "Number Containing Proportion",
-                                     textOutput("GI"),
-                                     theme = "bg-gradient-green-teal",
-                                     height = "100%"
-                                   )
-                                 ),
-                                 column(
-                                   width = 4,
-                                   value_box(
-                                     "Percentage Containing Proportion",
-                                     textOutput("percGI"),
-                                     theme = "bg-gradient-red-orange",
-                                     height = "100%"
-                                   )
-                                 )
-                               )
-                             ))
+                                                tabPanel("Population Graph",
+                                                         fluidPage(
+                                                           fluidRow(plotOutput("cov_prop_plot")),
+                                                           fluidRow(
+                                                             value_box(
+                                                               "Population Mean:",
+                                                               textOutput("popMean"),
+                                                               theme = "bg-gradient-green-teal",
+                                                               height = "100%"
+                                                             )
+                                                           )
+                                                         )),
+                                                tabPanel("Confidence Intervals",
+                                                         fluidPage(
+                                                           fluidRow(plotOutput("more_ints_plot")),
+                                                           fluidRow(
+                                                             ## HSW: Let's put it all in one box:
+                                                             value_box(
+                                                               title = "Coverage:",
+                                                               value = textOutput("percGI"),
+                                                               p(textOutput("simCount")),
+                                                               p(textOutput("GI")),
+                                                               theme = "primary",
+                                                               height = "100%"
+                                                             )
+                                                           )
+                                                         ))
                   ))
                 ))
 
 server <- function(input, output, session) {
   
   ###########################################################
-  # Function to keep track of intervals, means and coverage
+  # Reactive values to keep track of intervals, means and coverage
   ###########################################################
   
   rv <- reactiveValues(
@@ -104,10 +79,10 @@ server <- function(input, output, session) {
     number = 0,
     good = 0,
     intervals = NULL,
-    ## HSW:  what's your plan with rv$percs?
-    ## RCT: this is the storage space for the percentages which would be used
-    ##      in the graph i mentioned on lines 17-19.
-    percs = NULL
+    ## HSW:  we never needed this:
+    #percs = NULL
+    ## but for radio buttons I need this:
+    m = 50
   )
   
   ######################################
@@ -119,33 +94,27 @@ server <- function(input, output, session) {
     hide("n")
     hide("level")
     show("start_over")
-    ## HSW:  inputs form a radio button are of type
-    ## character, not numeric, so:
-    m <- as.numeric(input$m)
-    some_samps <- get_samples(m, input$n, input$pop)
+    some_samps <- get_samples(
+      as.numeric(input$m), 
+      input$n, 
+      input$pop
+    )
     ints_data <-
       get_intervals(
         some_samps,
         input$pop,
         input$level / 100
       )
-    ## HSW:  change here too:
-    rv$number <- rv$number + m
+    ## HSW:  Your app ran with an error because radio button
+    ## bring in their values as text.  You must convert to
+    ## numbers:
+    rv$number <- rv$number + as.numeric(input$m)
     rv$good <- rv$good + sum(ints_data$good)
+    print("hello")
     rv$intervals <- ints_data
-## HSW:  you must always remove material like this when
-## resolving a merge conflict:
-## <<<<<<< HEAD
- 
-
+    
     updateTabsetPanel(inputId = "inTabset",
                       selected = "Confidence Intervals")
-## =======
-    
-## HSW:  this should have been removed:
-    # updateTabsetPanel(inputId = "inTabset",
-    #                   selected = "More Intervals at a Time")
-## >>>>>>> a05456eae6df945da34263df9deda8313d3685e6
     
   })
   
@@ -157,43 +126,64 @@ server <- function(input, output, session) {
     rv$number <- 0
     rv$good <- 0
     rv$intervals<- NULL
-    rv$percs <- NULL
+    ## HSW:  we never needed this:
+    #rv$percs <- NULL
     updateTabsetPanel(inputId = "inTabset",
                       selected = "Population Graph")
+  })
+  
+  observeEvent(input$m, {
+    rv$m <- input$m
+  })
+  
+  ## HSW:  this renders the radio buttons with the correct wording:
+  output$m <- renderUI({
+    label <- ifelse(
+      rv$number == 0,
+      "Number of samples to take:",
+      "Number of new samples to take:"
+    )
+    radioButtons(
+      inputId = "m",
+      label = label,
+      choices = c(50, 100),
+      selected = isolate(rv$m)
+    )
   })
   
   output$cov_prop_plot <- renderPlot({
     draw_pop(input$pop)
   })
   
-  output$simCount <- renderText(rv$number)
-  output$GI <- renderText(sum(rv$good))
-  ## RCT: I added the as.numeric() because it said that these variables weren't numbers:
-  ## HSW:   That wasn't the issue:  we need sum of rv$good:
-  output$percGI <- renderText(round(sum(rv$good) / rv$number, 5) * 100)
+  output$simCount <- renderText({
+    paste0("So far, ", rv$number, " simulated samples have been taken.")
+  })
   
-  ## HSW:  see if you can fix this one:
-  ## I have a mean now but because it isn't reactive I believe it is the wrong one:
-  ## HSW: make this reactive on input$pop
-  ## use a switch statement (see R help on "switch") to set the mean to whatever
-  ## it should be
-  output$popMean <- renderText(mu_norm)
+  output$GI <- renderText({
+    paste0(
+      sum(rv$good),
+      " of the intervals built from these samples covered the mean."
+    )
+  })
   
-  # output$percs_plot <- 
-  #   renderPlot({
-  #     perc_plotr()
-  #   })
+  output$percGI <- renderText({
+    perc <- round(sum(rv$good) / rv$number, 5) * 100
+    paste0(perc, "%")
+  })
+  
+  output$popMean <- renderText(
+    switch(
+      input$pop,
+      normal = normal_mean,
+      skew = skew_mean,
+      super_skew = super_skew_mean,
+      outlier = outlier_mean)
+  )
   
   output$more_ints_plot <-
     renderPlot({
-      ## HSW:  i notice that when we start over and select a
-      ## different population and then make intervals, there
-      ## is a brief error message in the intervals tab.
-      ## We mgiht be able to preven this with req(), maybe
-      ## req(rv$intervals), let's see:
-      ## RCT: Under the hood, is req() using the promises from JS?
-      req(rv$intervals)
       interval_plot(rv$intervals, input$pop)
-    })
+  })
 }
+
 shinyApp(ui, server)
