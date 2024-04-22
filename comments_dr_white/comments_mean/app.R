@@ -13,8 +13,15 @@ source("Utilities.R")
 ## place the smiley-face icons so that they don't squeeze the text.
 ## I'm afraid we will have to let them go!
 
+## RCT: No worries, I was already thinking of the emojis as a temporary placeholder.
+## In the tile for the percentage of intervals that were good, I was thinking of making
+## inputting a graph that would update to show how the percentage gets closer
+## to the percentage error as we consider more intervals. Would this be useful?
+
+
 ui <- fluidPage(useShinyjs(),
-                theme = bslib::bs_theme(primary = "orange"),
+                theme = bslib::bs_theme(primary = "forestgreen"), ## RCT: What do you think of forest green?
+                                                                  ## I'm open to any suggestions.
                 fluidRow(
                   column(
                     width = 3,
@@ -98,6 +105,8 @@ server <- function(input, output, session) {
     good = 0,
     intervals = NULL,
     ## HSW:  what's your plan with rv$percs?
+    ## RCT: this is the storage space for the percentages which would be used
+    ##      in the graph i mentioned on lines 17-19.
     percs = NULL
   )
   
@@ -182,6 +191,7 @@ server <- function(input, output, session) {
       ## is a brief error message in the intervals tab.
       ## We mgiht be able to preven this with req(), maybe
       ## req(rv$intervals), let's see:
+      ## RCT: Under the hood, is req() using the promises from JS?
       req(rv$intervals)
       interval_plot(rv$intervals, input$pop)
     })

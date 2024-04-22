@@ -11,7 +11,7 @@ source("Utilities.R")
 ## changing the color to something less "loud" (please, not orange!)
 
 ui <- fluidPage(useShinyjs(),
-                theme = bslib::bs_theme(primary = "orange"),
+                theme = bslib::bs_theme(primary = "forestgreen"),
                 fluidRow(
                   column(
                     width = 3,
@@ -36,20 +36,14 @@ ui <- fluidPage(useShinyjs(),
                   ),
                   column(width = 9, tabsetPanel(id="inTabset",
                     tabPanel("Population Graph",
-                             ## HSW:  the above is not a good title.
-                             ## Why not:  "Population Graph"?
-                             ## make sure to revise your 
-                             ## updateTabsetPanel call accordingly
                              fluidPage(
                                fluidRow(plotOutput("cov_prop_plot")),
                                fluidRow(
                                  value_box(
                                    "Population Mean",
                                    textOutput("popMean"),
-                                   showcase = bsicons::bs_icon("emoji-heart-eyes"),
                                    theme = "bg-gradient-green-teal",
                                    height = "100%"
-                                   #showcase_layout = "bottom"
                                  )
                                )
                              )),
@@ -62,10 +56,8 @@ ui <- fluidPage(useShinyjs(),
                                    value_box(
                                      "Intervals So Far",
                                      textOutput("simCount"),
-                                     showcase = bsicons::bs_icon("emoji-heart-eyes"),
-                                     theme = "bg-gradient-green-teal",
+                                     theme = "primary",
                                      height = "100%"
-                                     #showcase_layout = "bottom"
                                    )
                                  ),
                                  column(
@@ -73,10 +65,8 @@ ui <- fluidPage(useShinyjs(),
                                    value_box(
                                      "Number Containing Proportion",
                                      textOutput("GI"),
-                                     showcase = bsicons::bs_icon("emoji-heart-eyes"),
-                                     theme = "bg-gradient-green-teal",
+                                     theme = "primary",
                                      height = "100%"
-                                     #showcase_layout = "bottom"
                                    )
                                  ),
                                  column(
@@ -84,8 +74,7 @@ ui <- fluidPage(useShinyjs(),
                                    value_box(
                                      "Percentage Containing Proportion",
                                      textOutput("percGI"),
-                                     showcase = bsicons::bs_icon("emoji-frown"),
-                                     theme = "bg-gradient-red-orange",
+                                     theme = "primary",
                                      height = "100%"
                                      #showcase_layout = "bottom"
                                    )
@@ -129,17 +118,9 @@ server <- function(input, output, session) {
     rv$number <- rv$number + input$m
     rv$good <- rv$good + sum(ints_data$good)
     rv$intervals <- ints_data
-<<<<<<< HEAD
- 
 
     updateTabsetPanel(inputId = "inTabset",
                       selected = "Confidence Intervals")
-=======
-    
-
-    updateTabsetPanel(inputId = "inTabset",
-                      selected = "More Intervals at a Time")
->>>>>>> a05456eae6df945da34263df9deda8313d3685e6
     
   })
   
@@ -162,16 +143,16 @@ server <- function(input, output, session) {
   
   output$simCount <- renderText(rv$number)
   output$GI <- renderText(sum(rv$good))
-  ## RCT: I added the as.numeric() because it said that these variables weren't numbers:
-  ## HSW:   That wasn't the issue:  we need sum of rv$good:
   output$percGI <- renderText(round(sum(rv$good) / rv$number, 5) * 100)
   
-  ## HSW:  see if you can fix this one:
-  ## I have a mean now but because it isn't reactive I believe it is the wrong one:
   ## HSW: make this reactive on input$pop
   ## use a switch statment (see R help on "switch") to set the mean to whatever
   ## it should be
-  output$popMean <- renderText(mu_norm)
+  output$popMean <- renderText(switch(input$pop,
+                                      normal = normal_mean,
+                                      skew = skew_mean,
+                                      super_skew = super_skew_mean,
+                                      outlier = outlier_mean))
   
   # output$percs_plot <- 
   #   renderPlot({
