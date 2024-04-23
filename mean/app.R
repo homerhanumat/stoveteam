@@ -74,6 +74,8 @@ server <- function(input, output, session) {
     m = 50
   )
   
+  
+  
   ######################################
   # Code to Control Element Visibility
   ######################################
@@ -126,6 +128,10 @@ server <- function(input, output, session) {
                                       super_skew = super_skew_mean,
                                       outlier = outlier_mean))
   
+  observeEvent(input$m, {
+    rv$m <- input$m
+  })
+  
   output$m <- renderUI({
     label <- ifelse(
       rv$number == 0,
@@ -137,6 +143,17 @@ server <- function(input, output, session) {
       label = label,
       choices = c(50, 100),
       selected = isolate(rv$m)
+    )
+  })
+  
+  output$simCount <- renderText({
+    paste0("So far, ", rv$number, " simulated samples have been taken.")
+  })
+  
+  output$GI <- renderText({
+    paste0(
+      sum(rv$good),
+      " of the intervals built from these samples covered the mean."
     )
   })
   

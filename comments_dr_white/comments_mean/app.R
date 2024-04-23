@@ -11,7 +11,7 @@ library(shinyjs)
 source("Utilities.R")
 
 ui <- fluidPage(useShinyjs(),
-                theme = bslib::bs_theme(primary = "forestgreen"),
+                theme = bslib::bs_theme(primary = "grey"),
                 fluidRow(
                   column(
                     width = 3,
@@ -42,7 +42,7 @@ ui <- fluidPage(useShinyjs(),
                                                              value_box(
                                                                "Population Mean:",
                                                                textOutput("popMean"),
-                                                               theme = "bg-gradient-green-teal",
+                                                               theme = "primary",
                                                                height = "100%"
                                                              )
                                                            )
