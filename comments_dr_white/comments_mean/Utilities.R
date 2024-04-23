@@ -233,7 +233,6 @@ interval_plot <- function(data, pop = c("normal", "skew", "super_skew", "outlier
       axis.text.y = element_blank(),
       axis.ticks.y = element_blank()
     ) +
-    ## HSW:  let's make a better legend:
     scale_color_manual('Did interval\ncover mean?', values=c('red','blue'))
   plot
 }

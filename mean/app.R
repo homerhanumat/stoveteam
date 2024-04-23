@@ -7,11 +7,8 @@ library(shinyjs)
 ## Load utility functions
 source("Utilities.R")
 
-## HSW:  I suggest leaving out the emojis, and 
-## changing the color to something less "loud" (please, not orange!)
-
 ui <- fluidPage(useShinyjs(),
-                theme = bslib::bs_theme(primary = "forestgreen"),
+                theme = bslib::bs_theme(primary = "grey"),
                 fluidRow(
                   column(
                     width = 3,
@@ -26,11 +23,11 @@ ui <- fluidPage(useShinyjs(),
                       "Confidence Level",
                       min = 10,
                       max = 99,
-                      value = 50,
+                      value = 90,
                       step = 1,
                       post = "%"
                     ),
-                    radioButtons("m", "Intervals to Draw", c(50,100)),
+                    uiOutput("m"),
                     actionButton("make_intervals", "Make Intervals"),
                     hidden(actionButton("start_over", "Start Over"))
                   ),
@@ -42,7 +39,7 @@ ui <- fluidPage(useShinyjs(),
                                  value_box(
                                    "Population Mean",
                                    textOutput("popMean"),
-                                   theme = "bg-gradient-green-teal",
+                                   theme = "primary",
                                    height = "100%"
                                  )
                                )
@@ -51,33 +48,13 @@ ui <- fluidPage(useShinyjs(),
                              fluidPage(
                                fluidRow(plotOutput("more_ints_plot")),
                                fluidRow(
-                                 column(
-                                   width = 4,
-                                   value_box(
-                                     "Intervals So Far",
-                                     textOutput("simCount"),
-                                     theme = "primary",
-                                     height = "100%"
-                                   )
-                                 ),
-                                 column(
-                                   width = 4,
-                                   value_box(
-                                     "Number Containing Proportion",
-                                     textOutput("GI"),
-                                     theme = "primary",
-                                     height = "100%"
-                                   )
-                                 ),
-                                 column(
-                                   width = 4,
-                                   value_box(
-                                     "Percentage Containing Proportion",
-                                     textOutput("percGI"),
-                                     theme = "primary",
-                                     height = "100%"
-                                     #showcase_layout = "bottom"
-                                   )
+                                 value_box(
+                                   title = "Coverage:",
+                                   value = textOutput("percGI"),
+                                   p(textOutput("simCount")),
+                                   p(textOutput("GI")),
+                                   theme = "primary",
+                                   height = "100%"
                                  )
                                )
                              ))
@@ -91,11 +68,10 @@ server <- function(input, output, session) {
   ###########################################################
   
   rv <- reactiveValues(
-    ## HSW:  let's start off with zeros:
     number = 0,
     good = 0,
     intervals = NULL,
-    percs = NULL
+    m = 50
   )
   
   ######################################
@@ -115,7 +91,7 @@ server <- function(input, output, session) {
         input$level / 100
       )
     
-    rv$number <- rv$number + input$m
+    rv$number <- rv$number + as.numeric(input$m)
     rv$good <- rv$good + sum(ints_data$good)
     rv$intervals <- ints_data
 
@@ -132,7 +108,6 @@ server <- function(input, output, session) {
     rv$number <- 0
     rv$good <- 0
     rv$intervals<- NULL
-    rv$percs <- NULL
     updateTabsetPanel(inputId = "inTabset",
                       selected = "Population Graph")
   })
@@ -145,19 +120,25 @@ server <- function(input, output, session) {
   output$GI <- renderText(sum(rv$good))
   output$percGI <- renderText(round(sum(rv$good) / rv$number, 5) * 100)
   
-  ## HSW: make this reactive on input$pop
-  ## use a switch statment (see R help on "switch") to set the mean to whatever
-  ## it should be
   output$popMean <- renderText(switch(input$pop,
                                       normal = normal_mean,
                                       skew = skew_mean,
                                       super_skew = super_skew_mean,
                                       outlier = outlier_mean))
   
-  # output$percs_plot <- 
-  #   renderPlot({
-  #     perc_plotr()
-  #   })
+  output$m <- renderUI({
+    label <- ifelse(
+      rv$number == 0,
+      "Number of samples to take:",
+      "Number of new samples to take:"
+    )
+    radioButtons(
+      inputId = "m",
+      label = label,
+      choices = c(50, 100),
+      selected = isolate(rv$m)
+    )
+  })
   
   output$more_ints_plot <-
     renderPlot({

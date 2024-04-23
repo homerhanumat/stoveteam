@@ -232,7 +232,8 @@ interval_plot <- function(data, pop = c("normal", "skew", "super_skew", "outlier
       panel.grid.minor.y = element_blank(),
       axis.text.y = element_blank(),
       axis.ticks.y = element_blank()
-    )
+    ) +
+  scale_color_manual('Did interval\ncover mean?', values=c('red','blue'))
   plot
 }
 

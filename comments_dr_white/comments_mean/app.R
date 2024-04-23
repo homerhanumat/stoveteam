@@ -1,6 +1,5 @@
-## HSW:  I fixed the error in your code and made a few small changes,
-## see specific comments below and in the Utilities.R file.
-## The app is looking good, ready to go!
+
+
 
 library(tidyverse)
 library(shiny)
@@ -27,12 +26,10 @@ ui <- fluidPage(useShinyjs(),
                       "Confidence Level",
                       min = 10,
                       max = 99,
-                      ## HSW:  let's have 90% confidence be the default:
                       value = 90,
                       step = 1,
                       post = "%"
                     ),
-                    ## HSW:  Let's render number of samples dynamically:
                     uiOutput("m"),
                     actionButton("make_intervals", "Make Intervals"),
                     hidden(actionButton("start_over", "Start Over"))
@@ -54,7 +51,6 @@ ui <- fluidPage(useShinyjs(),
                                                          fluidPage(
                                                            fluidRow(plotOutput("more_ints_plot")),
                                                            fluidRow(
-                                                             ## HSW: Let's put it all in one box:
                                                              value_box(
                                                                title = "Coverage:",
                                                                value = textOutput("percGI"),
@@ -75,13 +71,9 @@ server <- function(input, output, session) {
   ###########################################################
   
   rv <- reactiveValues(
-    ## HSW:  let's start off with zeros:
     number = 0,
     good = 0,
     intervals = NULL,
-    ## HSW:  we never needed this:
-    #percs = NULL
-    ## but for radio buttons I need this:
     m = 50
   )
   
@@ -105,9 +97,6 @@ server <- function(input, output, session) {
         input$pop,
         input$level / 100
       )
-    ## HSW:  Your app ran with an error because radio button
-    ## bring in their values as text.  You must convert to
-    ## numbers:
     rv$number <- rv$number + as.numeric(input$m)
     rv$good <- rv$good + sum(ints_data$good)
     print("hello")
@@ -126,8 +115,6 @@ server <- function(input, output, session) {
     rv$number <- 0
     rv$good <- 0
     rv$intervals<- NULL
-    ## HSW:  we never needed this:
-    #rv$percs <- NULL
     updateTabsetPanel(inputId = "inTabset",
                       selected = "Population Graph")
   })
@@ -135,8 +122,7 @@ server <- function(input, output, session) {
   observeEvent(input$m, {
     rv$m <- input$m
   })
-  
-  ## HSW:  this renders the radio buttons with the correct wording:
+
   output$m <- renderUI({
     label <- ifelse(
       rv$number == 0,
