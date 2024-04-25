@@ -61,7 +61,7 @@ ui <- pageWithSidebar(
     div(id= "inputs",
     sliderInput("proportion", "Proportion", min=0, max=1, value=0.5),
     numericInput("sample_size", "Sample Size", value=100),
-    sliderInput("level", "Level", min=0, max=1, value=0.9),
+    sliderInput("level", "Level", min=0.10, max=0.99,step=0.01, value=0.9),
     selectInput("interval_type", "Interval Type", choices=c("wilson", "wald", "waldcc", "agresti-coull", "jeffreys",
                                                             "modified wilson", "wilsoncc","modified jeffreys",
                                                             "clopper-pearson", "arcsine", "logit", "witting", "pratt", 
@@ -73,7 +73,7 @@ ui <- pageWithSidebar(
   mainPanel = mainPanel(
     column( width=12,
       hidden(plotOutput("plot")),
-      hidden(textOutput("text"))
+      hidden(verbatimTextOutput("text"))
     )
   )
 )
@@ -105,10 +105,19 @@ server <- function(input, output, session) {
       hide("plot")
       hide("text")
     })
-    
+    output$plot <- renderPlot({
+      interval_plot(data=rv$last_intervals, 
+                    prob=isolate(input$proportion))
+    })
+      
     output$text <- renderText(
-      rv$total_intervals
-    )
+      glue::glue("
+      There were {rv$total_intervals} total intervals created so far. 
+      Of the total number of intervals created, {rv$good_intervals} contain the proportion. 
+      The percentage of good intervals is {rv$good_intervals/rv$total_intervals*100}%."
+      
+    ))
+    
 }
   
  
