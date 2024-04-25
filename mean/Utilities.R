@@ -225,7 +225,7 @@ interval_plot <- function(data, pop = c("normal", "skew", "super_skew", "outlier
         color = good
       )
     ) +
-    geom_point(aes(x = xbar, y = number), size = 0.5) +
+    geom_point(aes(x = xbar, y = number), size = 0.75) +
     labs( x = NULL, y = NULL) +
     theme(
       panel.grid.major.y = element_blank(),

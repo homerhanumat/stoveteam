@@ -120,7 +120,7 @@ server <- function(input, output, session) {
   
   output$simCount <- renderText(rv$number)
   output$GI <- renderText(sum(rv$good))
-  output$percGI <- renderText(round(sum(rv$good) / rv$number, 5) * 100)
+  output$percGI <- renderText(paste(round(sum(rv$good) / rv$number, 4) * 100, "%"))
   
   output$popMean <- renderText(switch(input$pop,
                                       normal = normal_mean,
