@@ -27,6 +27,8 @@ library(tidyverse)
 library(readxl)
 library(shiny)
 library(nlme)
+library(shinyjs)
+library(DescTools)
 ## for menas app:
 ##library(bslib)
 ##library(bsicons)
