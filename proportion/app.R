@@ -17,6 +17,29 @@ interval_df <- function(N, n, level, prob, method) {
     mutate(covers = prob >= lwr.ci & prob <= upr.ci)
 }
 
+interval_plot <- function(data, prob) {
+  plot <- ggplot(data) +
+    geom_vline(aes(xintercept = prob)) +
+    geom_segment(
+      aes(
+        x = lwr.ci,
+        xend = upr.ci,
+        y = number,
+        yend = number,
+        color = covers
+      )
+    ) +
+    geom_point(aes(x = est, y = number), size = 0.5) +
+    labs( x = NULL, y = NULL) +
+    theme(
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+  plot
+}
+
 make_interval <- function(x, n, level, method, report) {
   res <- BinomCI(
     x = x,
