@@ -1,0 +1,101 @@
+[33mcommit c1227f080c4aae54b24682e160991fbf1e68ba40[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Rhys Tilford <rhystilford@gmail.com>
+Date:   Thu Apr 4 08:06:27 2024 -0400
+
+    began work on ui structure
+
+[33mcommit cc4d10349cfca18319cf8d29295293e9b944b19c[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Thu Apr 4 07:04:27 2024 -0400
+
+    add notes to final section
+
+[33mcommit 68f506d48d1369bc450baa346ff424d30233a74b[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Mon Apr 1 22:30:33 2024 -0400
+
+    fix more typos; remove lorem ipsum
+
+[33mcommit 2d0b4d26d4d5d3cd482b634472215c73c6c400fe[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Mon Apr 1 17:49:57 2024 -0400
+
+    fix algebra error
+
+[33mcommit 63ee08d5431f3d6f8f06d31048eb4d89fa9e80af[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Mon Apr 1 14:24:23 2024 -0400
+
+    implement parametric method
+
+[33mcommit 82ea0389e917ea6618ea87ad33bcf85832da404d[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Sun Mar 31 16:17:28 2024 -0400
+
+    fix bootstrap
+
+[33mcommit 92247b59bd26a1a6216d1eb8cdf9ddd6ef187da4[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Sun Mar 31 08:53:49 2024 -0400
+
+    begin writing notes
+
+[33mcommit d05999514cfd09d63429484dfd9b4799f5a05198[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Sat Mar 30 22:06:49 2024 -0400
+
+    add bootstrap implementation
+
+[33mcommit c1a3c16c02ccb468a1288e16d9e9143c1118c2b7[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Sat Mar 30 21:17:02 2024 -0400
+
+    plot sample
+
+[33mcommit e4242d4576db121a61fc90484506a21c8c2e4ea9[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Sat Mar 30 21:09:26 2024 -0400
+
+    add better ci function
+
+[33mcommit 5c266c04e7b4940ebf15e8d8206b0c928ba53e40[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Sat Mar 30 17:37:37 2024 -0400
+
+    encapsulate into function
+
+[33mcommit 4cbba634ddda5d84a05dacce4dd1a63ad496aaac[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Sat Mar 30 14:26:07 2024 -0400
+
+    scripts for proportions and for sampling
+
+[33mcommit 091d1625a9fc177e08fff23f80f5ef9810c40ff7[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Thu Mar 28 08:48:34 2024 -0400
+
+    assign apps
+
+[33mcommit d73c785168c8c490325c92fd89fbeeb0af0cdfb0[m
+Author: Rhys Tilford <rhystilford@gmail.com>
+Date:   Thu Mar 28 08:40:10 2024 -0400
+
+    an example commit
+
+[33mcommit 0c08e5c58b306e4033f475d8456b698086f6657d[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Wed Mar 27 14:56:02 2024 -0400
+
+    remove .DS_Store
+
+[33mcommit ff3e33537f61071ad8913f7176bb0ad95f09ee27[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Wed Mar 27 14:54:36 2024 -0400
+
+    remove .DS_Store
+
+[33mcommit 89f94f42468724cf8df2c15dea5ca777b0276d5c[m
+Author: Homer White <homerhanumat@gmail.com>
+Date:   Wed Mar 27 14:51:34 2024 -0400
+
+    initial commit
