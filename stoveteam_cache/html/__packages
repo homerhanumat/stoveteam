@@ -11,3 +11,8 @@ lubridate
 readxl
 shiny
 nlme
+shinyjs
+DescTools
+bslib
+glue
+bsicons

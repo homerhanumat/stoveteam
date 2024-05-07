@@ -157,6 +157,7 @@ server <- function(input, output, session) {
             <td>{perc}%</td>
           </tr>
         </tbody>
+      </table>
       '
     )
     

@@ -5,14 +5,14 @@ date: "`r Sys.Date()`"
 output:
   rmdformats::readthedown:
     highlight: kate
-    toc_depth: 2
-  html_document:
-    #toc: true
-    #toc_float: true
-    #toc_collapsed: true
-knit: (function(inputFile, encoding) {
-  rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs", output_file = "index.html") })
-#runtime: shiny
+    toc_depth: 3
+#   html_document:
+#     #toc: true
+#     #toc_float: true
+#     #toc_collapsed: true
+# knit: (function(inputFile, encoding) {
+#   rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs", output_file = "index.html") })
+runtime: shiny
 resource_files:
 - computation/app.R
 - mean/app.R
@@ -29,9 +29,9 @@ library(shiny)
 library(nlme)
 library(shinyjs)
 library(DescTools)
-## for menas app:
-##library(bslib)
-##library(bsicons)
+library(bslib)
+library(glue)
+library(bsicons)
 ## knitr options:
 knitr::opts_chunk$set(
   echo = FALSE,
@@ -112,15 +112,13 @@ In the app below, the user can select:
 
 The user can then direct the app to take fifty random samples from the population, computing from each sample a confidence interval. The user can see which of these intervals cover $p$ and which do not. The process can be repeated as many times as the user likes, and the app will keep track of the percentage of times the intervals have covered $p$.  The longer the user goes on, the closer this percentage will come to the actual level of confidence of the interval.  Anytime the user likes he or she can start the proces over, selecting another method, or another sample size, or another level of confidence, or another value for $p$---or any combination of these.
 
-**APP GOES HERE**
-
 <!-- Finn does this app-->
 
-```{r proportion, echo=FALSE, eval = FALSE}
+```{r proportion, echo=FALSE, eval = TRUE}
 shinyAppDir(
   appDir = "proportion",
   options = list(
-    width = "100%", height = 550
+    width = "100%", height = 600
   )
 )
 ```
@@ -275,17 +273,15 @@ Pressing a Start Over button, the user can make new choices for population, smap
 
 For the normal population, the actual and nominal confidence levels are the same, at any sample size. For other populations, expect to see differences between nominal and actual levels--in some cases even when the sample size is fairly large.
 
-**APP GOES HERE**
-
  
 <!-- Rhys does this app-->
 
 
-```{r mean, echo=FALSE, eval = FALSE}
+```{r mean, echo=FALSE, eval = TRUE}
 shinyAppDir(
   appDir = "mean",
   options = list(
-    width = "100%", height = 550
+    width = "100%", height = 700
   )
 )
 ```
@@ -494,17 +490,15 @@ When the simulation is complete the main panel of the app will show two tabs:
 
 The user may start over and set new specifications for the simulation.
 
-**APP GOES HERE**
-
 <!-- Christara does this app-->
 
 ```{r computation, echo=FALSE}
-# shinyAppDir(
-#   appDir = "computation",
-#   options = list(
-#     width = "100%", height = 550
-#   )
-# )
+shinyAppDir(
+  appDir = "computation",
+  options = list(
+    width = "100%", height = 700
+  )
+)
 ```
 
 **Note**:  If the two groups are given the same mean and same standard deviation, then the resulting population is normally distributed, with that common mean and that common standard deviation.  If in addition the user specifies that all households should be studied for the same number of days---e.g., by entering something like `(4, 16)` to indicate that we want to sample 16 households and study each of them for four days---then all of the mathematical assumptions of our confidence-interval method are met, and the actual and nominal levels of confidence are the same.
@@ -774,20 +768,18 @@ in the app below, each time the user presses the action button the observed meas
 
 Try the app many times, comparing the right and left columns as you go.
 
-**APP GOES HERE**
-
 <!-- Eivory does this app-->
 
-```{r sampling, echo=FALSE}
-# shinyAppDir(
-#   appDir = "sampling",
-#   options = list(
-#     width = "100%", height = 550
-#   )
-# )
+```{r sampling, echo=FALSE, eval=TRUE}
+shinyAppDir(
+  appDir = "sampling",
+  options = list(
+    width = "100%", height = 550
+  )
+)
 ```
 
-You will probably notice that, on the whole the averages from scrambled measurements are much less spread apart from each other than are the averages from the actual study.  This is happening because the households are *not* similar with respect to usage:  some households use more wood per-capita on average than do other houses.
+You will probably notice that on the whole the averages from scrambled measurements are much less spread apart from each other than are the averages from the actual study.  This is happening because the households are *not* similar with respect to usage:  some households use more wood per-capita on average than do other houses.
 
 ### Analysis of Variance
 
