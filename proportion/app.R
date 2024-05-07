@@ -51,7 +51,7 @@ make_interval <- function(x, n, level, method, report) {
     lower <- round(res[1, "lwr.ci"], 3)
     upper <- round(res[1, "upr.ci"], 3)
     margin <- (upper - lower) / 2
-
+    
     msg <- glue::glue(
       'When there are {successes} successes in {n} trials,
       then our point estimate for the population proportion is:
@@ -99,7 +99,7 @@ ui <- pageWithSidebar(
     column(
       width = 12,
       hidden(plotOutput("plot")),
-      hidden(verbatimTextOutput("text"))
+      hidden(htmlOutput("results_table"))
     )
   )
 )
@@ -110,26 +110,26 @@ server <- function(input, output, session) {
     good_intervals = 0,
     last_intervals = NULL
   )
-
+  
   observeEvent(input$make_intervals, {
     intervals <- interval_df(N = 50, n = input$sample_size, level = input$level, prob = input$proportion, method = input$interval_type)
     rv$total_intervals <- rv$total_intervals + 50
     rv$good_intervals <- rv$good_intervals + sum(intervals$covers)
     rv$last_intervals <- intervals
-
+    
     show("start_over")
     show("plot")
-    show("text")
+    show("results_table")
     hide("inputs")
   })
   observeEvent(input$start_over, {
     rv$total_intervals <- 0
     rv$good_intervals <- 0
     rv$last_intervals <- NULL
-
+    
     show("inputs")
     hide("plot")
-    hide("text")
+    hide("results_table")
   })
   output$plot <- renderPlot({
     interval_plot(
@@ -137,13 +137,29 @@ server <- function(input, output, session) {
       prob = isolate(input$proportion)
     )
   })
-
-  output$text <- renderText({
+  
+  output$results_table <- renderText({
+    
     perc <- round(rv$good_intervals / rv$total_intervals * 100, 2)
-    glue::glue("
-      There were {rv$total_intervals} total intervals created so far.
-      Of the total number of intervals created, {rv$good_intervals} contain the proportion.
-      The percentage of good intervals is {perc}%.")
+    
+    glue::glue(
+      '<table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Total Intervals</th>
+            <th scope="col">Intervals Covering the Proportion</th>
+            <th scope="col">Coverage Rate</th>
+          </tr>
+        <tbody>
+          <tr>
+            <td>{rv$total_intervals}</td>
+            <td>{rv$good_intervals}</td>
+            <td>{perc}%</td>
+          </tr>
+        </tbody>
+      '
+    )
+    
   })
 }
 
