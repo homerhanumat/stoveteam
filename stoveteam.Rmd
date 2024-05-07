@@ -1,23 +1,19 @@
 ---
-title: "Confidence Intervals:  Notes for Stoveteam, International"
+title: 'Confidence Intervals:  Notes for Stoveteam, International'
 author: "CSC 400, Spring 2024"
 date: "`r Sys.Date()`"
 output:
   rmdformats::readthedown:
     highlight: kate
     toc_depth: 3
-#   html_document:
-#     #toc: true
-#     #toc_float: true
-#     #toc_collapsed: true
-# knit: (function(inputFile, encoding) {
-#   rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs", output_file = "index.html") })
 runtime: shiny
 resource_files:
 - computation/app.R
 - mean/app.R
 - sampling/app.R
 - proportion/app.R
+- mean/Utilities.R
+- sampling/For Review_Ret_Justa_July KPT Complete_KPT_4day (1).xlsx
 ---
 
 ```{r setup, include=FALSE}
