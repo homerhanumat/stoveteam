@@ -74,11 +74,8 @@ make_interval <- function(x, n, level, method, report) {
   )
 }
 
-ui <- pageWithSidebar(
-  headerPanel = headerPanel(
-    "Proportion App"
-  ),
-  sidebarPanel = sidebarPanel(
+ui <- fluidPage(
+  sidebarPanel(
     useShinyjs(),
     div(
       id = "inputs",
@@ -95,7 +92,7 @@ ui <- pageWithSidebar(
     actionButton("make_intervals", "Make Intervals"),
     hidden(actionButton("start_over", "Start Over"))
   ),
-  mainPanel = mainPanel(
+  mainPanel(
     column(
       width = 12,
       hidden(plotOutput("plot")),

@@ -30,7 +30,7 @@ density_with_rug <- function(df, title) {
     xlim(c(0, 8)) +
     ylim(c(0, 1)) +
     labs(
-      x = "Household Means Of Daily Per-capita Usage",
+      x = "household means",
       title = title
     )
 }
@@ -50,8 +50,8 @@ density_with_rug(df = sample_means, title = " ")
 
 summary_stats <- function(vals) {
   c(
-    mean = mean(vals),
-    stdev = sd(vals)
+    mean = round(mean(vals), 3),
+    stdev = round(sd(vals), 3)
   )
 }
 
@@ -61,9 +61,11 @@ ui <- fluidPage(
   titlePanel("Sampling Measurement App"),
   sidebarLayout(
     sidebarPanel(
+      width = 3,
       actionButton(inputId = "resample", "Resample")
     ),
     mainPanel(
+      width = 9,
       fluidRow(
         column(
           width = 6,
@@ -95,7 +97,7 @@ server <- function(input, output) {
        geom_rug() +
        xlim(c(0, 8)) +
        ylim(c(0, 1)) +
-      labs(x = "Household Means of Daily Per-Capita Usage", title = "Household Means of the Actual Data")
+      labs(x = "household means", title = "Actual Data")
   })
   
   output$the_actual_stats <- renderPrint({
@@ -109,7 +111,7 @@ server <- function(input, output) {
       summarise(household_mean = mean(wood))
     plot <- density_with_rug(
       df = rs_means,
-      title = "Household Means for the Resampled data"
+      title = "Resampled Data"
     )
     plot
   })
