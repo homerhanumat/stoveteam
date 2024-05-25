@@ -140,7 +140,7 @@ server <- function(input, output, session) {
     ) %>% 
      group_by(j) %>% 
       summarize(n = n())
-    names(put_back) <- c("houses", "days")
+    names(put_back) <- c("days", "houses")
     put_back$houses <- as.integer(put_back$houses)
     put_back
   })
